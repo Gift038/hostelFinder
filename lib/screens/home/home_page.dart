@@ -4,13 +4,10 @@ import '../../widgets/service_card.dart';
 import 'package:path_provider_android/messages.g.dart';
 import 'tenants_dashboard.dart';
 import 'managers_dashboard.dart';
-<<<<<<< HEAD
 import '../tenant_dashboard/notification_screen.dart';
 import '../auth/register_account_screen.dart';
-=======
 import 'sign_up_screen.dart';
 import '../../screens/auth/register_account_screen.dart';
->>>>>>> 956c840142514c398e4c76f3cee0081c2c2e06e1
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,11 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       case 1:
         Navigator.push(
           context,
-<<<<<<< HEAD
           MaterialPageRoute(builder: (context) => NotificationScreen()),
-=======
-          MaterialPageRoute(builder: (context) => const TenantsDashboardScreen()),
->>>>>>> 956c840142514c398e4c76f3cee0081c2c2e06e1
         );
         break;
       case 2:

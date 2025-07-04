@@ -8,6 +8,7 @@ import '../manager_dashboard/room_management_screen.dart';
 import '../manager_dashboard/payments_screen.dart';
 import '../tenant_dashboard/notification_screen.dart' as tenant;
 import '../auth/register_account_screen.dart';
+// import '../manager_dashboard/publish_add_screen.dart';
 
 void main() {
   runApp(const ManagerDashboard());
@@ -161,7 +162,25 @@ class QuickActions extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AddResidentScreen()),
+                  MaterialPageRoute(builder: (_) => const AddResidentScreen()),
+                );
+              },
+            ),
+            ActionButton(
+              label: 'Booking Requests',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BookingsRequestScreen()),
+                );
+              },
+            ),
+            ActionButton(
+              label: 'Publish Add',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PublishAddScreen()),
                 );
               },
             ),
@@ -517,6 +536,90 @@ class ActivityItem extends StatelessWidget {
       ),
       title: Text(title, style: const TextStyle(color: coffeeBrown)),
       subtitle: Text(subtitle, style: const TextStyle(color: coffeeBrown)),
+    );
+  }
+}
+
+class PublishAddScreen extends StatefulWidget {
+  const PublishAddScreen({Key? key}) : super(key: key);
+
+  @override
+  State<PublishAddScreen> createState() => _PublishAddScreenState();
+}
+
+class _PublishAddScreenState extends State<PublishAddScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  String? _imagePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Publish Add')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => v == null || v.isEmpty ? 'Enter a title' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                validator: (v) => v == null || v.isEmpty ? 'Enter a description' : null,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.image),
+                    label: const Text('Upload Image'),
+                    onPressed: () async {
+                      // Placeholder for image picker
+                      setState(() {
+                        _imagePath = 'assets/hostel1.jpg';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  if (_imagePath != null)
+                    Text('Image selected', style: TextStyle(color: Colors.green)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Published: ${_titleController.text}\n${_descController.text}${_imagePath != null ? '\nImage: $_imagePath' : ''}'),
+                      ),
+                    );
+                    _titleController.clear();
+                    _descController.clear();
+                    setState(() => _imagePath = null);
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

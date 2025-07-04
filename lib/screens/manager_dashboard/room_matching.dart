@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RoomManagementScreen extends StatefulWidget {
   const RoomManagementScreen({super.key});
@@ -43,6 +44,11 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
     },
   ];
 
+  // Example available rooms
+  final List<String> availableRooms = ['101', '102', '201', '202', '301'];
+  Map<String, String> residentRoomAssignments = {};
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
     // Filter residents by gender
@@ -61,7 +67,7 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text('Room Management & ...'),
+        title: const Text('Room Management & Matching'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -118,13 +124,62 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                       itemCount: matchedResidents.length,
                       itemBuilder: (context, index) {
                         final resident = matchedResidents[index];
+                        final assignedRoom = residentRoomAssignments[resident['name']];
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(resident['avatar']),
                           ),
                           title: Text(resident['name']),
-                          subtitle: Text(
-                              'Shared Interests: ${resident['interests'].join(', ')}'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Shared Interests: ${resident['interests'].join(', ')}'),
+                              if (assignedRoom != null)
+                                Text('Assigned Room: $assignedRoom', style: const TextStyle(color: Colors.green)),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              DropdownButton<String>(
+                                value: assignedRoom,
+                                hint: const Text('Select Room'),
+                                items: availableRooms.map((room) {
+                                  return DropdownMenuItem(
+                                    value: room,
+                                    child: Text(room),
+                                  );
+                                }).toList(),
+                                onChanged: (room) {
+                                  setState(() {
+                                    residentRoomAssignments[resident['name']] = room!;
+                                  });
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.check, color: Colors.green),
+                                tooltip: 'Assign Room',
+                                onPressed: assignedRoom == null
+                                    ? null
+                                    : () async {
+                                        try {
+                                          // Persist assignment to Firestore (assumes resident['id'] exists)
+                                          await _firestore.collection('residents').doc(resident['id']).update({
+                                            'assigned_room': assignedRoom,
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('${resident['name']} assigned to room $assignedRoom')),
+                                          );
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Error: '
+                                                + e.toString())),
+                                          );
+                                        }
+                                      },
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),

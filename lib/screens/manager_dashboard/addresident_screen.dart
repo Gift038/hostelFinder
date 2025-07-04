@@ -61,20 +61,26 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
       'move_in_date': _moveInDate,
       'created_at': FieldValue.serverTimestamp(),
     };
-    if (id == null) {
-      await _firestore.collection('residents').add(data);
-    } else {
-      await _firestore.collection('residents').doc(id).update(data);
+    try {
+      if (id == null) {
+        await _firestore.collection('residents').add(data);
+      } else {
+        await _firestore.collection('residents').doc(id).update(data);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(id == null ? "Resident added" : "Resident updated"),
+        ),
+      );
+      _clearForm();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: '
+            + e.toString())),
+      );
     }
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(id == null ? "Resident added" : "Resident updated"),
-      ),
-    );
-
-    _clearForm();
   }
 
   void _clearForm() {
@@ -88,11 +94,19 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
   }
 
   Future<void> _deleteResident(String id) async {
-    await _firestore.collection('residents').doc(id).delete();
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Resident deleted")));
+    try {
+      await _firestore.collection('residents').doc(id).delete();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Resident deleted")));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: '
+            + e.toString())),
+      );
+    }
   }
 
   @override
