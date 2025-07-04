@@ -14,8 +14,9 @@ void main() {
   runApp(const ManagerDashboard());
 }
 
-const Color coffeeBrown = Color(0xFF4B2E19);
-const Color whiteBeige = Color(0xFFF5F5DC); // White beige
+const Color coffeeBrown = Color(0xFF4B2E05);
+const Color lightCoffeeBrown = Color(0xFF9C7A5F);
+const Color dirtyBrownWhite = Color(0xFFFAF3E3);
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
@@ -25,15 +26,17 @@ class ManagerDashboard extends StatelessWidget {
     return MaterialApp(
       title: 'Manager Dashboard',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.brown)
-            .copyWith(
-              secondary: coffeeBrown,
-              surface: whiteBeige,
-            ),
-        scaffoldBackgroundColor: whiteBeige,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.brown,
+        ).copyWith(
+          secondary: coffeeBrown,
+          surface: Colors.white,
+          background: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
-          backgroundColor: coffeeBrown,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: coffeeBrown,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -85,11 +88,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: coffeeBrown,
+        backgroundColor: Colors.brown[100],
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTap,
-        selectedItemColor: whiteBeige,
-        unselectedItemColor: whiteBeige.withOpacity(0.7),
+        selectedItemColor: coffeeBrown,
+        unselectedItemColor: lightCoffeeBrown,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -237,7 +241,7 @@ class _ActionButtonState extends State<ActionButton> {
   Widget build(BuildContext context) {
     Color getButtonColor() {
       if (_isPressed || _isHovering) return coffeeBrown;
-      return whiteBeige;
+      return Colors.white;
     }
 
     Color getTextColor() {
@@ -346,7 +350,7 @@ class OverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      color: whiteBeige,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -390,7 +394,7 @@ class KeyMetrics extends StatelessWidget {
         const SizedBox(height: 10),
         Card(
           elevation: 2,
-          color: whiteBeige,
+          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -420,7 +424,7 @@ class KeyMetrics extends StatelessWidget {
                   alignment: Alignment.center,
                   child: const Text(
                     'Line Chart Placeholder',
-                    style: TextStyle(color: whiteBeige),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
@@ -451,7 +455,7 @@ class PaymentStatus extends StatelessWidget {
         const SizedBox(height: 10),
         Card(
           elevation: 2,
-          color: whiteBeige,
+          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -462,7 +466,7 @@ class PaymentStatus extends StatelessWidget {
                 LinearProgressIndicator(
                   value: 0.9,
                   valueColor: const AlwaysStoppedAnimation<Color>(coffeeBrown),
-                  backgroundColor: whiteBeige,
+                  backgroundColor: Colors.white,
                 ),
                 const SizedBox(height: 8),
                 const Text(

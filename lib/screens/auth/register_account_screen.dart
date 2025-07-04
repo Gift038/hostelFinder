@@ -21,6 +21,10 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
   String _name = '';
   String _gender = '';
   String _contact = '';
+  String _school = '';
+  String _programme = '';
+  String _yearOfStudy = '';
+  String _hostelManaged = '';
 
   final _formKey = GlobalKey<FormState>();
 
@@ -174,6 +178,66 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
             validator: (v) => v == null || v.isEmpty ? 'Enter contact info' : null,
             onChanged: (v) => _contact = v,
           ),
+          if (_role == 'Tenant') ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'School',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: Icon(Icons.school, color: lightCoffeeBrown),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: coffeeBrown, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Enter your school' : null,
+              onChanged: (v) => _school = v,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Programme of Study',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: Icon(Icons.menu_book, color: lightCoffeeBrown),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: coffeeBrown, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Enter your programme' : null,
+              onChanged: (v) => _programme = v,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Year of Study',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: Icon(Icons.calendar_today, color: lightCoffeeBrown),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: coffeeBrown, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Enter your year of study' : null,
+              onChanged: (v) => _yearOfStudy = v,
+            ),
+          ],
+          if (_role == 'Hostel Manager') ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Name of Hostel Managed',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: Icon(Icons.home_work, color: lightCoffeeBrown),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: coffeeBrown, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Enter name of hostel managed' : null,
+              onChanged: (v) => _hostelManaged = v,
+            ),
+          ],
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,6 +261,9 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
                       contact: _contact,
                       gender: _gender,
                       email: _contact, // or use a separate email field if available
+                      school: _role == 'Tenant' ? _school : '',
+                      programme: _role == 'Tenant' ? _programme : '',
+                      yearOfStudy: _role == 'Tenant' ? _yearOfStudy : '',
                     );
                     if (_role == 'Tenant') {
                       Navigator.pushReplacement(

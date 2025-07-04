@@ -1,7 +1,6 @@
 // ignore_for_file: unused_import
 
 import 'package:flutter/material.dart';
-import 'package:hostelhunt_app/screens/manager_dashboard/settings_screen.dart';
 import 'screens/home/welcome_screen.dart';
 import 'screens/home/home_page.dart';
 import 'screens/tenant_dashboard/search_filter_screen.dart';
@@ -18,6 +17,7 @@ import 'screens/home/managers_dashboard.dart';
 import 'screens/manager_dashboard/room_management_screen.dart';
 import 'screens/manager_dashboard/bookings_request.dart';
 import 'screens/manager_dashboard/maintenance_repair.dart';
+import 'screens/manager_dashboard/settings_screen.dart';
 import 'screens/tenant_dashboard/tenant_document_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -31,12 +31,26 @@ class UserProvider extends ChangeNotifier {
   String contact = '';
   String gender = '';
   String email = '';
+  String school = '';
+  String programme = '';
+  String yearOfStudy = '';
 
-  void setUser({required String name, required String contact, required String gender, required String email}) {
+  void setUser({
+    required String name,
+    required String contact,
+    required String gender,
+    required String email,
+    String school = '',
+    String programme = '',
+    String yearOfStudy = '',
+  }) {
     this.name = name;
     this.contact = contact;
     this.gender = gender;
     this.email = email;
+    this.school = school;
+    this.programme = programme;
+    this.yearOfStudy = yearOfStudy;
     notifyListeners();
   }
 }
