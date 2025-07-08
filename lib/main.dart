@@ -34,6 +34,7 @@ class UserProvider extends ChangeNotifier {
   String school = '';
   String programme = '';
   String yearOfStudy = '';
+  String role = '';
 
   void setUser({
     required String name,
@@ -43,6 +44,7 @@ class UserProvider extends ChangeNotifier {
     String school = '',
     String programme = '',
     String yearOfStudy = '',
+    String role = '',
   }) {
     this.name = name;
     this.contact = contact;
@@ -51,6 +53,7 @@ class UserProvider extends ChangeNotifier {
     this.school = school;
     this.programme = programme;
     this.yearOfStudy = yearOfStudy;
+    this.role = role;
     notifyListeners();
   }
 }

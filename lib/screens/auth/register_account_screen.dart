@@ -264,6 +264,7 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
                       school: _role == 'Tenant' ? _school : '',
                       programme: _role == 'Tenant' ? _programme : '',
                       yearOfStudy: _role == 'Tenant' ? _yearOfStudy : '',
+                      role: _role,
                     );
                     if (_role == 'Tenant') {
                       Navigator.pushReplacement(
