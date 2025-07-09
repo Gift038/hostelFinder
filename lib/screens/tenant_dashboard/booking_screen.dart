@@ -206,7 +206,7 @@ class _BookNowButtonState extends State<_BookNowButton> {
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: widget.coffeeBrown.withOpacity(0.08),
+                color: widget.coffeeBrown.withAlpha(20),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../widgets/hostel_card.dart';
 import '../../widgets/service_card.dart';
-import 'package:path_provider_android/messages.g.dart';
 import 'tenants_dashboard.dart';
 import 'managers_dashboard.dart';
-import '../tenant_dashboard/notification_screen.dart';
 import '../auth/register_account_screen.dart';
-import 'sign_up_screen.dart';
-import '../../screens/auth/register_account_screen.dart';
 import 'package:provider/provider.dart';
 import '../../main.dart';
 
@@ -389,7 +385,7 @@ class _AnimatedCreateAccountButtonState extends State<_AnimatedCreateAccountButt
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: widget.coffeeBrown.withOpacity(0.18),
+                color: widget.coffeeBrown.withAlpha((0.18 * 255).toInt()),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

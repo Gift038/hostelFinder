@@ -165,7 +165,7 @@ class VirtualToursScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: coffeeBrown.withOpacity(0.2)),
+                        border: Border.all(color: coffeeBrown.withAlpha(51)),
                       ),
                               child: Center(
                                 child: Text(
@@ -282,7 +282,7 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
                         height: 8,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: idx == _currentImage ? coffeeBrown : lightCoffeeBrown.withOpacity(0.4),
+                          color: idx == _currentImage ? coffeeBrown : lightCoffeeBrown.withAlpha(102),
                         ),
                       )),
                     ),
@@ -395,7 +395,7 @@ class _BookNowButtonState extends State<_BookNowButton> {
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: Colors.brown.withOpacity(0.1),
+                color: Colors.brown.withAlpha(25),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

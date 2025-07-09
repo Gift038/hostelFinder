@@ -300,7 +300,7 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
               color: coffeeBrownLight,
               child: ListTile(
                 tileColor: coffeeBrownLight,
-                title: Text("Room "+data['room_number'], style: TextStyle(color: coffeeBrown)),
+                title: Text("Room ${data['room_number']}", style: TextStyle(color: coffeeBrown)),
                 subtitle: Text(
                   "${data['room_type']} | Capacity: ${data['capacity']} | Price: ${data['price']} | Available: ${data['available'] ? "Yes" : "No"}\nMove-in: ${DateFormat('yyyy-MM-dd').format((data['move_in_date'] as Timestamp).toDate())}",
                   style: TextStyle(color: coffeeBrown),

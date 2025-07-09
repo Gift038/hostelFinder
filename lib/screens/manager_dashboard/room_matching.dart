@@ -167,10 +167,12 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                                           await _firestore.collection('residents').doc(resident['id']).update({
                                             'assigned_room': assignedRoom,
                                           });
+                                          if (!context.mounted) return;
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('${resident['name']} assigned to room $assignedRoom')),
                                           );
                                         } catch (e) {
+                                          if (!context.mounted) return;
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('Error: '
                                                 + e.toString())),

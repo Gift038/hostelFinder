@@ -113,7 +113,7 @@ class _PaymentMethodCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: coffeeBrown.withOpacity(0.04),
+              color: coffeeBrown.withAlpha((255 * 0.04).toInt()),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

@@ -110,7 +110,7 @@ class ManagerProfileScreen extends StatelessWidget {
                           Icon(Icons.home_work, color: brown),
                           const SizedBox(width: 12),
                           Text(
-                            userProvider.hostelManaged != null && userProvider.hostelManaged.isNotEmpty
+                            userProvider.hostelManaged.isNotEmpty
                                 ? userProvider.hostelManaged
                                 : 'Hostel Managed',
                             style: TextStyle(fontSize: 16, color: coffeeBrown, fontWeight: FontWeight.w600),

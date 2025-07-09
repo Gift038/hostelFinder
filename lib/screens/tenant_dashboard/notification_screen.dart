@@ -178,23 +178,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  IconData _getIcon(String type) {
-    switch (type) {
-      case 'booking_confirmed':
-        return Icons.check_circle_outline;
-      case 'checkin_reminder':
-        return Icons.calendar_today;
-      case 'hostel_update':
-        return Icons.notifications;
-      case 'booking_canceled':
-        return Icons.cancel_outlined;
-      case 'new_review':
-        return Icons.star_border;
-      default:
-        return Icons.notifications_none;
-    }
-  }
-
   Future<void> addNotificationToFirestore({
     required String userId,
     required String title,

@@ -17,7 +17,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   final Color coffeeBrown = const Color(0xFF4B2E05);
   final Color lightBrown = const Color(0xFFD7CCC8);
-  final Color backgroundOverlay = Colors.black.withOpacity(0.25);
+  final Color backgroundOverlay = Colors.black.withAlpha(64);
 
   @override
   void initState() {
@@ -66,11 +66,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withAlpha(218),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: coffeeBrown.withOpacity(0.18),
+                      color: coffeeBrown.withAlpha(46),
                       blurRadius: 18,
                       spreadRadius: 2,
                     ),

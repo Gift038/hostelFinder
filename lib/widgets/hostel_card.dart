@@ -28,7 +28,7 @@ class HostelCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+            colors: [Colors.black.withAlpha((0.6 * 255).toInt()), Colors.transparent],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
           ),

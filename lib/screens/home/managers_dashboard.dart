@@ -5,8 +5,7 @@ import '../manager_dashboard/bookings_request.dart';
 import '../manager_dashboard/maintenance_repair.dart';
 import '../manager_dashboard/room_management_screen.dart';
 import '../manager_dashboard/payments_screen.dart';
-import '../tenant_dashboard/notification_screen.dart' as tenant;
-import '../auth/register_account_screen.dart';
+import '../manager_dashboard/manager_profile_screen.dart';
 // import '../manager_dashboard/publish_add_screen.dart';
 
 void main() {
@@ -263,7 +262,7 @@ class _ActionButtonState extends State<ActionButton> {
           boxShadow: _isHovering
               ? [
                   BoxShadow(
-                    color: coffeeBrown.withOpacity(0.25),
+                    color: coffeeBrown.withAlpha((255 * 0.25).toInt()),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
