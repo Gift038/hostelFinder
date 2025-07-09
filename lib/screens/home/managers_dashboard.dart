@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../manager_dashboard/addresident_screen.dart';
 import '../manager_dashboard/notification_screen.dart' as manager;
-import '../manager_dashboard/settings_screen.dart';
 import '../manager_dashboard/bookings_request.dart';
 import '../manager_dashboard/maintenance_repair.dart';
 import '../manager_dashboard/room_management_screen.dart';
@@ -70,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const PaymentsScreen(),
     const AddResidentScreen(),
     const manager.NotificationScreen(),
-    const SettingsScreen(),
+    const ManagerProfileScreen(),
   ];
 
   void _onBottomNavTap(int index) {
@@ -106,8 +105,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),

@@ -86,7 +86,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Maintenance & Repairs')),
+      appBar: AppBar(
+        title: const Text(''),
+      ),
       body: ListView.builder(
         itemCount: _requests.length,
         itemBuilder: (context, index) {

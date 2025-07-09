@@ -17,8 +17,8 @@ import 'screens/home/managers_dashboard.dart';
 import 'screens/manager_dashboard/room_management_screen.dart';
 import 'screens/manager_dashboard/bookings_request.dart';
 import 'screens/manager_dashboard/maintenance_repair.dart';
-import 'screens/manager_dashboard/settings_screen.dart';
 import 'screens/tenant_dashboard/tenant_document_screen.dart';
+import 'screens/manager_dashboard/manager_profile_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -35,6 +35,7 @@ class UserProvider extends ChangeNotifier {
   String programme = '';
   String yearOfStudy = '';
   String role = '';
+  String hostelManaged = '';
 
   void setUser({
     required String name,
@@ -45,6 +46,7 @@ class UserProvider extends ChangeNotifier {
     String programme = '',
     String yearOfStudy = '',
     String role = '',
+    String hostelManaged = '',
   }) {
     this.name = name;
     this.contact = contact;
@@ -54,6 +56,7 @@ class UserProvider extends ChangeNotifier {
     this.programme = programme;
     this.yearOfStudy = yearOfStudy;
     this.role = role;
+    this.hostelManaged = hostelManaged;
     notifyListeners();
   }
 }
@@ -116,8 +119,6 @@ class HostelHuntApp extends StatelessWidget {
         '/managerBookingRequest': (context) => BookingsRequestScreen(),
         '/managerMaintenance': (context) => MaintenanceRepairsScreen(),
         '/managerRoomManagement': (context) => RoomManagementScreen(),
-        '/managerSettings': (context) => SettingsScreen(),
-        '/tenantPayment': (context) => PaymentScreen(),
         '/managerPayment': (context) => PaymentsScreen(),
         '/tenantNotifications': (context) => tenant.NotificationScreen(),
         '/managerNotifications': (context) => manager.NotificationScreen(),
@@ -126,6 +127,7 @@ class HostelHuntApp extends StatelessWidget {
         '/manager': (context) => ManagerDashboard(),
         '/room_management': (context) => const RoomManagementScreen(),
         '/tenant_documents': (context) => const TenantDocumentScreen(),
+        '/managerProfile': (context) => ManagerProfileScreen(),
       },
     );
   }
