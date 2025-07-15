@@ -1,7 +1,6 @@
 // ignore_for_file: unused_import
 
 import 'package:flutter/material.dart';
-import 'screens/home/login_screen.dart';
 import 'screens/home/home_page.dart';
 import 'screens/tenant_dashboard/search_filter_screen.dart';
 import 'screens/tenant_dashboard/hostel_list_screen.dart';
@@ -19,6 +18,7 @@ import 'screens/manager_dashboard/bookings_request.dart';
 import 'screens/manager_dashboard/maintenance_repair.dart';
 import 'screens/tenant_dashboard/tenant_document_screen.dart';
 import 'screens/manager_dashboard/manager_profile_screen.dart';
+import 'screens/home/welcome_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -108,7 +108,7 @@ class HostelHuntApp extends StatelessWidget {
     return MaterialApp(
       title: 'HostelHunt',
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const WelcomeScreen(),
       routes: {
         '/dashboard': (context) => const HomeScreen(),
         '/search_filter': (context) => const SearchFilterScreen(),

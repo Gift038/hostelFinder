@@ -1,3 +1,4 @@
+// hostel_card.dart flie
 import 'package:flutter/material.dart';
 
 class HostelCard extends StatelessWidget {
@@ -19,10 +20,7 @@ class HostelCard extends StatelessWidget {
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-        ),
+        color: Colors.grey[300],
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -39,6 +37,12 @@ class HostelCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Text(
+                  'Image goes here',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                ),
+              ),
               Text(
                 title,
                 style: const TextStyle(

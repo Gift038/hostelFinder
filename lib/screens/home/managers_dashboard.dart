@@ -593,7 +593,7 @@ class _PublishAddScreenState extends State<PublishAddScreen> {
                     onPressed: () async {
                       // Placeholder for image picker
                       setState(() {
-                        _imagePath = 'assets/hostel1.jpg';
+                        _imagePath = null; // Image should be fetched from backend
                       });
                     },
                   ),

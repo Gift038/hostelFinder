@@ -13,7 +13,7 @@ class MatchingHostelsScreen extends StatelessWidget {
         'rating': 9.2,
         'distance': '1.2 miles away',
         'price': '680,000',
-        'image': 'assets/hostel1.jpg',
+        'image': null, // Image should be fetched from backend
         'location': 'Makerere, Uganda',
         'nights': '1 night · 1 guest',
         'description': 'Located near the main campus, this hostel offers a comfortable and secure living environment for students.',
@@ -30,14 +30,14 @@ class MatchingHostelsScreen extends StatelessWidget {
         'rating': 8.8,
         'distance': '2.5 miles away',
         'price': '800,000',
-        'image': 'assets/hostel2.jpg',
+        'image': null, // Image should be fetched from backend
       },
       {
         'name': 'Villa Hub Hostel',
         'rating': 9.0,
         'distance': '3.1 miles away',
         'price': '900,000',
-        'image': 'assets/hostel3.jpg',
+        'image': null, // Image should be fetched from backend
       },
     ];
     final List<Map<String, dynamic>> others = [
@@ -46,14 +46,14 @@ class MatchingHostelsScreen extends StatelessWidget {
         'rating': 7.5,
         'distance': '4.2 miles away',
         'price': '1,200,000',
-        'image': 'assets/hostel4.jpg',
+        'image': null, // Image should be fetched from backend
       },
       {
         'name': 'Sempa Hostel',
         'rating': 8.0,
         'distance': '5.5 miles away',
         'price': '2,000,000',
-        'image': 'assets/hostel5.jpg',
+        'image': null, // Image should be fetched from backend
       },
     ];
     return Scaffold(
@@ -92,12 +92,21 @@ class MatchingHostelsScreen extends StatelessWidget {
                       ClipRRect(
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
-                        child: Image.asset(
-                          hostel['image'],
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                        ),
+                        child: hostel['image'] != null
+                            ? Image.asset(
+                                hostel['image']!,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 90,
+                                height: 90,
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                                ),
+                              ),
                       ),
                       Expanded(
                         child: Padding(
@@ -133,12 +142,21 @@ class MatchingHostelsScreen extends StatelessWidget {
                       ClipRRect(
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
-                        child: Image.asset(
-                          hostel['image'],
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                        ),
+                        child: hostel['image'] != null
+                            ? Image.asset(
+                                hostel['image']!,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 90,
+                                height: 90,
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                                ),
+                              ),
                       ),
                       Expanded(
                         child: Padding(

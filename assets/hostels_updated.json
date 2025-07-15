@@ -1,0 +1,1627 @@
+[
+  {
+    "id": "hostel001",
+    "name": "Braetd",
+    "gender": "Female",
+    "min_price": 560000,
+    "max_price": 760000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets", "Quiet hours after 10 PM"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3341, "lng": 32.5678},
+    "academic_programs": {"Computer Science": 10, "Medicine": 5, "Engineering": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 560000,
+        "desc": "Cozy room for one with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 5,
+        "total": 8
+      },
+      {
+        "type": "Double Room",
+        "price": 760000,
+        "desc": "Spacious shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db",
+      "https://images.unsplash.com/photo-1560448208-4d9b3e6bb6dc"
+    ]
+  },
+  {
+    "id": "hostel002",
+    "name": "JJ",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 750000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3342, "lng": 32.5679},
+    "academic_programs": {"Computer Science": 12, "Business": 10, "Law": 7},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 750000,
+        "desc": "Shared room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 120,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel003",
+    "name": "Lady Juliana",
+    "gender": "Female",
+    "min_price": 800000,
+    "max_price": 850000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No male visitors after 8 PM", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3343, "lng": 32.5680},
+    "academic_programs": {"Medicine": 15, "Nursing": 10},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 800000,
+        "desc": "Comfortable single room for female students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 7
+      },
+      {
+        "type": "Double Room",
+        "price": 850000,
+        "desc": "Shared room with ensuite bathroom",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 5
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel004",
+    "name": "Makerere Garden Courts",
+    "gender": "Female",
+    "min_price": 700000,
+    "max_price": 800000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3344, "lng": 32.5681},
+    "academic_programs": {"Law": 8, "Education": 12},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 700000,
+        "desc": "Private room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 800000,
+        "desc": "Shared room for two students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 4
+      }
+    ],
+    "rating": 4.8,
+    "reviews": 110,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db",
+      "https://images.unsplash.com/photo-1560448208-4d9b3e6bb6dc"
+    ]
+  },
+  {
+    "id": "hostel005",
+    "name": "Nakiyingi",
+    "gender": "Mixed",
+    "min_price": 900000,
+    "max_price": 1000000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3345, "lng": 32.5682},
+    "academic_programs": {"Engineering": 10, "Computer Science": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 900000,
+        "desc": "Premium single room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 2,
+        "total": 4
+      },
+      {
+        "type": "Double Room",
+        "price": 1000000,
+        "desc": "Spacious room for two with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 0,
+        "total": 3
+      }
+    ],
+    "rating": 4.4,
+    "reviews": 80,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel006",
+    "name": "New Nana",
+    "gender": "Mixed",
+    "min_price": 450000,
+    "max_price": 650000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3346, "lng": 32.5683},
+    "academic_programs": {"Business": 15, "Social Sciences": 10},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 450000,
+        "desc": "Affordable single room",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 6,
+        "total": 10
+      },
+      {
+        "type": "Double Room",
+        "price": 650000,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 3,
+        "total": 5
+      }
+    ],
+    "rating": 4.3,
+    "reviews": 70,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel007",
+    "name": "Olympia",
+    "gender": "Mixed",
+    "min_price": 800000,
+    "max_price": 2500000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3347, "lng": 32.5684},
+    "academic_programs": {"Law": 5, "Medicine": 3},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 800000,
+        "desc": "Luxury single room",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 2,
+        "total": 4
+      },
+      {
+        "type": "Double Room",
+        "price": 1500000,
+        "desc": "Premium shared room",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.9,
+    "reviews": 150,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db",
+      "https://images.unsplash.com/photo-1560448208-4d9b3e6bb6dc"
+    ]
+  },
+  {
+    "id": "hostel008",
+    "name": "Akwata Empola",
+    "gender": "Mixed",
+    "min_price": 500000,
+    "max_price": 650000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3348, "lng": 32.5685},
+    "academic_programs": {"Engineering": 12, "Computer Science": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 500000,
+        "desc": "Single room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 7
+      },
+      {
+        "type": "Double Room",
+        "price": 650000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 95,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel009",
+    "name": "Apex",
+    "gender": "Female",
+    "min_price": 670000,
+    "max_price": 870000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No male visitors after 8 PM", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3349, "lng": 32.5686},
+    "academic_programs": {"Nursing": 10, "Medicine": 7},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room for female students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870000,
+        "desc": "Shared room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel010",
+    "name": "Aryan",
+    "gender": "Mixed",
+    "min_price": 680000,
+    "max_price": 860000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3350, "lng": 32.5687},
+    "academic_programs": {"Business": 10, "Social Sciences": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 680000,
+        "desc": "Single room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 860000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel011",
+    "name": "Dream World",
+    "gender": "Mixed",
+    "min_price": 680000,
+    "max_price": 870000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3351, "lng": 32.5688},
+    "academic_programs": {"Computer Science": 15, "Engineering": 10},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 680000,
+        "desc": "Private room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870000,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel012",
+    "name": "Edith Hetty",
+    "gender": "Female",
+    "min_price": 460000,
+    "max_price": 660000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No male visitors after 8 PM", "No alcohol"],
+    "distance_km": 0.6,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3352, "lng": 32.5689},
+    "academic_programs": {"Education": 12, "Social Sciences": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 460000,
+        "desc": "Affordable single room for female students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 5,
+        "total": 8
+      },
+      {
+        "type": "Double Room",
+        "price": 660000,
+        "desc": "Shared room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.4,
+    "reviews": 75,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel013",
+    "name": "Kann",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3353, "lng": 32.5690},
+    "academic_programs": {"Engineering": 10, "Business": 7},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel014",
+    "name": "Kare",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3354, "lng": 32.5691},
+    "academic_programs": {"Law": 8, "Computer Science": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Private room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 850000,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel015",
+    "name": "Makerere International Students’ Hostel (MISH)",
+    "gender": "Mixed",
+    "min_price": 680000,
+    "max_price": 900000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3355, "lng": 32.5692},
+    "academic_programs": {"International Relations": 10, "Business": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 680000,
+        "desc": "Single room for international students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 900000,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.8,
+    "reviews": 110,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db",
+      "https://images.unsplash.com/photo-1560448208-4d9b3e6bb6dc"
+    ]
+  },
+  {
+    "id": "hostel016",
+    "name": "Muhika",
+    "gender": "Mixed",
+    "min_price": 750000,
+    "max_price": 850000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3356, "lng": 32.5693},
+    "academic_programs": {"Engineering": 12, "Medicine": 3},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 750000,
+        "desc": "Private room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 850000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel017",
+    "name": "Nalika",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870000,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3357, "lng": 32.5694},
+    "academic_programs": {"Computer Science": 10, "Law": 6},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel018",
+    "name": "Pearl View",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870002,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3358, "lng": 32.5695},
+    "academic_programs": {"Business": 8, "Social Sciences": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870002,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel019",
+    "name": "St. Monica",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870004,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3359, "lng": 32.5696},
+    "academic_programs": {"Education": 10, "Nursing": 7},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room for students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870004,
+        "desc": "Shared room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel020",
+    "name": "Sunway",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870006,
+    "location": "Kikoni, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3360, "lng": 32.5697},
+    "academic_programs": {"Computer Science": 12, "Engineering": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870006,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel021",
+    "name": "Zoa",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870008,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3361, "lng": 32.5698},
+    "academic_programs": {"Business": 10, "Law": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870008,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel022",
+    "name": "Baskon",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870010,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3362, "lng": 32.5699},
+    "academic_programs": {"Engineering": 10, "Computer Science": 7},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870010,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel023",
+    "name": "Bbira",
+    "gender": "Female",
+    "min_price": 670000,
+    "max_price": 870012,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No male visitors after 8 PM", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3363, "lng": 32.5700},
+    "academic_programs": {"Nursing": 12, "Medicine": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room for female students",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870012,
+        "desc": "Shared room with study desk",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel024",
+    "name": "Castleville",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870014,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3364, "lng": 32.5701},
+    "academic_programs": {"Business": 10, "Social Sciences": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870014,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel025",
+    "name": "Cheds",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870016,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3365, "lng": 32.5702},
+    "academic_programs": {"Computer Science": 8, "Engineering": 6},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870016,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel026",
+    "name": "Douglas Villa",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870018,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3366, "lng": 32.5703},
+    "academic_programs": {"Law": 7, "Business": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870018,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel027",
+    "name": "Herican",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870020,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3367, "lng": 32.5704},
+    "academic_programs": {"Engineering": 10, "Computer Science": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870020,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel028",
+    "name": "Messiah",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870022,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3368, "lng": 32.5705},
+    "academic_programs": {"Social Sciences": 8, "Education": 6},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870022,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel029",
+    "name": "Prince",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870024,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3369, "lng": 32.5706},
+    "academic_programs": {"Business": 10, "Law": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 870024,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel030",
+    "name": "Waveney Courts",
+    "gender": "Mixed",
+    "min_price": 670000,
+    "max_price": 870000,
+    "location": "Makerere West, Kampala",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.5,
+    "university": "Makerere University",
+    "coordinates": {"lat": 0.3370, "lng": 32.5707},
+    "academic_programs": {"Computer Science": 12, "Engineering": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 670000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 870000,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.8,
+    "reviews": 110,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db",
+      "https://images.unsplash.com/photo-1560448208-4d9b3e6bb6dc"
+    ]
+  },
+  {
+    "id": "hostel031",
+    "name": "Beco Hostels (Boma)",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850000,
+    "location": "Town, Mbarara",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.4,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6167, "lng": 30.6667},
+    "academic_programs": {"Medicine": 15, "Nursing": 10},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 850000,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel032",
+    "name": "Golf Course Hostel",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850002,
+    "location": "Town, Mbarara",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.4,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6168, "lng": 30.6668},
+    "academic_programs": {"Business": 10, "Engineering": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 850002,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel033",
+    "name": "Triple B Hostel",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850004,
+    "location": "Town, Mbarara",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.4,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6169, "lng": 30.6669},
+    "academic_programs": {"Computer Science": 8, "Social Sciences": 6},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 850004,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel034",
+    "name": "Mark Hostels",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850006,
+    "location": "Town, Mbarara",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.4,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6170, "lng": 30.6670},
+    "academic_programs": {"Law": 7, "Education": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 850006,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.5,
+    "reviews": 85,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel035",
+    "name": "Corpus Christi Hostel",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850008,
+    "location": "Town, Mbarara",
+    "security_measures": "Gateman, Fenced Perimeter",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No alcohol"],
+    "distance_km": 0.4,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6171, "lng": 30.6671},
+    "academic_programs": {"Medicine": 12, "Nursing": 8},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Single room with study area",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 4,
+        "total": 6
+      },
+      {
+        "type": "Double Room",
+        "price": 850008,
+        "desc": "Shared room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 2,
+        "total": 4
+      }
+    ],
+    "rating": 4.6,
+    "reviews": 90,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  },
+  {
+    "id": "hostel036",
+    "name": "Cape Villa Hostels",
+    "gender": "Mixed",
+    "min_price": 650000,
+    "max_price": 850010,
+    "location": "Campus, Mbarara",
+    "security_measures": "Gateman, CCTV",
+    "facilities": ["Wi-Fi", "Reading Rooms"],
+    "rules": ["No smoking", "No pets"],
+    "distance_km": 0.2,
+    "university": "Mbarara University of Science and Technology",
+    "coordinates": {"lat": -0.6172, "lng": 30.6672},
+    "academic_programs": {"Engineering": 10, "Computer Science": 5},
+    "rooms": [
+      {
+        "type": "Single Room",
+        "price": 650000,
+        "desc": "Private room with Wi-Fi",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6"
+        ],
+        "available": 3,
+        "total": 5
+      },
+      {
+        "type": "Double Room",
+        "price": 850010,
+        "desc": "Shared room for two",
+        "images": [
+          "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
+          "https://images.unsplash.com/photo-1598928509268-4e9d8670710d"
+        ],
+        "available": 1,
+        "total": 3
+      }
+    ],
+    "rating": 4.7,
+    "reviews": 100,
+    "hostelImages": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db"
+    ]
+  }
+]

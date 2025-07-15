@@ -24,11 +24,16 @@ class HostelDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    hostel['image'] ?? '',
+                  child: Container(
                     height: 180,
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: Text(
+                        'Image goes here',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

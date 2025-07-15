@@ -12,6 +12,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../google_maps.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class TenantsDashboardScreen extends StatefulWidget {
   const TenantsDashboardScreen({super.key});
@@ -37,6 +39,8 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   String _selectedUniversity = '';
   LatLng? _universityCenter;
   List<Hostel>? _filteredHostels;
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _loadingSearch = false;
 
   @override
   void initState() {
@@ -107,14 +111,39 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     }
   }
 
-  void _handleSearch() {
-    final query = _searchController.text.trim();
+  Future<List<Map<String, dynamic>>> _loadHostels() async {
+    try {
+      // Try Firestore first
+      final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      }
+    } catch (_) {}
+    // Fallback to JSON
+    final String jsonString = await rootBundle.loadString('assets/hostels_updated.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    return jsonList.cast<Map<String, dynamic>>();
+  }
+
+  void _handleSearch() async {
+    final query = _searchController.text.trim().toLowerCase();
     if (query.isNotEmpty) {
       setState(() {
         _isSearching = true;
         _searchQuery = query;
+        _loadingSearch = true;
       });
       _searchController.clear();
+      final hostels = await _loadHostels();
+      final filtered = hostels.where((hostel) {
+        final name = (hostel['name'] ?? '').toString().toLowerCase();
+        final location = (hostel['location'] ?? '').toString().toLowerCase();
+        return name.contains(query) || location.contains(query);
+      }).toList();
+      setState(() {
+        _searchResults = filtered;
+        _loadingSearch = false;
+      });
     }
   }
 
@@ -122,6 +151,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     setState(() {
       _isSearching = false;
       _searchQuery = '';
+      _searchResults = [];
     });
   }
 
@@ -307,37 +337,27 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Sample search results - you can replace these with actual results
-                    _buildSearchResultItem(
-                      'The Student Hub',
-                      'Wandegeya, Kampala',
-                      'UGX 500,000/month',
-                      '4.8 ★ (120 reviews)',
-                      'assets/hostel1.jpg',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildSearchResultItem(
-                      'Campus Living',
-                      'Kikoni, Kampala',
-                      'UGX 400,000/month',
-                      '4.6 ★ (95 reviews)',
-                      'assets/hostel2.jpg',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildSearchResultItem(
-                      'University Residence',
-                      'Makerere University',
-                      'UGX 550,000/month',
-                      '4.5 ★ (150 reviews)',
-                      'assets/hostel3.jpg',
-                    ),
-                  ],
-                ),
-              ),
+              child: _loadingSearch
+                  ? const Center(child: CircularProgressIndicator())
+                  : _searchResults.isEmpty
+                      ? const Center(child: Text('No hostels found.'))
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _searchResults.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, i) {
+                            final hostel = _searchResults[i];
+                            return _buildSearchResultItem(
+                              hostel['name'] ?? '',
+                              hostel['location'] ?? '',
+                              'UGX ${hostel['min_price'] ?? ''}/month',
+                              hostel['rating'] != null ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)' : '',
+                              (hostel['hostelImages'] != null && (hostel['hostelImages'] as List).isNotEmpty)
+                                  ? hostel['hostelImages'][0]
+                                  : '',
+                            );
+                          },
+                        ),
             ),
           ],
         ),
@@ -357,11 +377,13 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              imagePath,
+            child: Container(
               width: 60,
               height: 60,
-              fit: BoxFit.cover,
+              color: Colors.grey[300],
+              child: Center(
+                child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+              ),
             ),
           ),
           const SizedBox(width: 12),

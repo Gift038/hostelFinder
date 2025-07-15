@@ -1,3 +1,4 @@
+//virtual_tours.dart file
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -261,11 +262,11 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
                     child: ClipRRect(
                       key: ValueKey(_currentImage),
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        images[_currentImage],
+                      child: Container(
                         width: double.infinity,
                         height: 120,
-                        fit: BoxFit.cover,
+                        color: Colors.grey[300],
+                        child: Center(child: Text('Image goes here', style: TextStyle(color: Colors.grey[700]))),
                       ),
                     ),
                   ),
@@ -483,11 +484,11 @@ class _HostelImageCarouselState extends State<_HostelImageCarousel> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              widget.images[_current],
+            child: Container(
               width: double.infinity,
               height: 180,
-              fit: BoxFit.cover,
+              color: Colors.grey[300],
+              child: Center(child: Text('Image goes here', style: TextStyle(color: Colors.grey[700]))),
             ),
           ),
           Positioned(

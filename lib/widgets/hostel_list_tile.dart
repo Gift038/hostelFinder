@@ -1,3 +1,4 @@
+// hostel_list_tile.dart file
 import 'package:flutter/material.dart';
 
 class HostelListTile extends StatefulWidget {
@@ -183,11 +184,13 @@ class _HostelListTileState extends State<HostelListTile> {
                 // Right: Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    widget.imagePath,
+                  child: Container(
                     width: 80,
                     height: 70,
-                    fit: BoxFit.cover,
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+                    ),
                   ),
                 ),
               ],

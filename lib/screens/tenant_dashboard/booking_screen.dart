@@ -46,11 +46,16 @@ class _BookingScreenState extends State<BookingScreen> {
         padding: EdgeInsets.zero,
         children: [
           // Room image
-          Image.asset(
-            'assets/hostel1.jpg',
+          Container(
             height: 160,
             width: double.infinity,
-            fit: BoxFit.cover,
+            color: Colors.grey[300],
+            child: Center(
+              child: Text(
+                'Image goes here',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),

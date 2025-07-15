@@ -174,22 +174,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   scrollDirection: Axis.horizontal,
                   children: const [
                     HostelCard(
-                      imagePath: 'assets/hostel1.jpg',
+                      imagePath: '', // Image should be fetched from backend
                       title: 'Makerere University Hostels',
                       subtitle: 'Find hostels near Makerere University',
                     ),
                     HostelCard(
-                      imagePath: 'assets/hostel2.jpg',
+                      imagePath: '',
                       title: 'Kyambogo University Hostels',
                       subtitle: 'Find hostels near Kyambogo University',
                     ),
                     HostelCard(
-                      imagePath: 'assets/hostel3.jpg',
+                      imagePath: '',
                       title: 'Uganda Christian University Hostels',
                       subtitle: 'Find hostels near UCU',
                     ),
                     HostelCard(
-                      imagePath: 'assets/hostel1.jpg',
+                      imagePath: '',
                       title: 'Busitema University Hostels',
                       subtitle: 'Find hostels near Busitema University',
                     ),
