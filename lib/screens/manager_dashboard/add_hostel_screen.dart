@@ -6,7 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class AddHostelScreen extends StatefulWidget {
+  const AddHostelScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _AddHostelScreenState createState() => _AddHostelScreenState();
 }
 

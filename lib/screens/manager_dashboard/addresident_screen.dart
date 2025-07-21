@@ -35,10 +35,8 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
-    if (picked != null) {
-      setState(() => _moveInDate = picked);
+    setState(() => _moveInDate = picked);
     }
-  }
 
   Future<void> _saveResident({String? id}) async {
     final roomNumber = _roomNumberController.text.trim();
