@@ -6,7 +6,18 @@ import '../manager_dashboard/maintenance_repair.dart';
 import '../manager_dashboard/room_management_screen.dart';
 import '../manager_dashboard/payments_screen.dart';
 import '../manager_dashboard/manager_profile_screen.dart';
-// import '../manager_dashboard/publish_add_screen.dart';
+import '../manager_dashboard/add_hostel_screen.dart';
+import '../chat/conversations_screen.dart';
+import '../manager_dashboard/tenants_listening.dart';
+import '../manager_dashboard/broadcast_screen.dart';
+import '../manager_dashboard/analytics_screen.dart';
+import '../manager_dashboard/publish_addscreen.dart';
+import '../manager_dashboard/room_matching.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Added for Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // Added for FirebaseAuth
+import '../manager_dashboard/view_documents_screen.dart';
+import '../manager_dashboard/expenses_screen.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const ManagerDashboard());
@@ -26,11 +37,7 @@ class ManagerDashboard extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.brown,
-        ).copyWith(
-          secondary: coffeeBrown,
-          surface: Colors.white,
-          background: Colors.white,
-        ),
+        ).copyWith(secondary: coffeeBrown, surface: Colors.white),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
@@ -69,9 +76,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const AddResidentScreen(),
     const manager.NotificationScreen(),
     const ManagerProfileScreen(),
+    const ConversationsScreen(),
   ];
 
-  void _onBottomNavTap(int index) {
+  void _onNavTap(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -81,59 +89,175 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manager\'s Dashboard'),
+        title: Text(
+          'Manager\'s Dashboard',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         centerTitle: true,
       ),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[100],
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
-        selectedItemColor: coffeeBrown,
-        unselectedItemColor: lightCoffeeBrown,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onNavTap,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Payments'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Residents'),
-          BottomNavigationBarItem(
+          NavigationDestination(icon: Icon(Icons.payment), label: 'Payments'),
+          NavigationDestination(icon: Icon(Icons.people), label: 'Residents'),
+          NavigationDestination(
             icon: Icon(Icons.notifications),
             label: 'Notifications',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+          NavigationDestination(icon: Icon(Icons.message), label: 'Messages'),
         ],
       ),
     );
   }
 }
 
-class DashboardContent extends StatelessWidget {
+class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
 
   @override
+  State<DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<DashboardContent> {
+  Future<Map<String, dynamic>> _fetchDashboardData() async {
+    final managerId = FirebaseAuth.instance.currentUser?.uid;
+    if (managerId == null) {
+      return {
+        'occupancyRate': 0.0,
+        'totalRevenue': 0.0,
+        'averageRent': 0.0,
+        'recentActivity': <ActivityItem>[],
+      };
+    }
+
+    // 1. Fetch all hostels managed by this manager to calculate room stats
+    final hostelsSnapshot = await FirebaseFirestore.instance
+        .collection('hostels')
+        .where('managerId', isEqualTo: managerId)
+        .get();
+
+    int totalRooms = 0;
+    int occupiedRooms = 0;
+    if (hostelsSnapshot.docs.isNotEmpty) {
+      for (final hostelDoc in hostelsSnapshot.docs) {
+        final data = hostelDoc.data();
+        totalRooms += (data['totalRooms'] as num?)?.toInt() ?? 0;
+        occupiedRooms += (data['occupiedRooms'] as num?)?.toInt() ?? 0;
+      }
+    }
+
+    // 2. Fetch this month's successful payments to calculate revenue
+    // Note: This query may require a custom index in Firestore.
+    // Check your debug console for a link to create it if you get an error.
+    double totalRevenue = 0.0;
+    int successfulPayments = 0;
+    final now = DateTime.now();
+    final startOfMonth = Timestamp.fromDate(DateTime(now.year, now.month, 1));
+    final endOfMonth = Timestamp.fromDate(DateTime(now.year, now.month + 1, 0));
+
+    final paymentsSnapshot = await FirebaseFirestore.instance
+        .collection('payments')
+        .where('managerId', isEqualTo: managerId)
+        .where('date', isGreaterThanOrEqualTo: startOfMonth)
+        .where('date', isLessThan: endOfMonth)
+        .get();
+
+    for (final paymentDoc in paymentsSnapshot.docs) {
+      final data = paymentDoc.data();
+      if (data['status'] == 'Success') {
+        totalRevenue += (data['amount'] as num?)?.toDouble() ?? 0.0;
+        successfulPayments++;
+      }
+    }
+
+    final totalPayments = paymentsSnapshot.docs.length;
+    final paidPercentage = totalPayments > 0
+        ? (successfulPayments / totalPayments)
+        : 0.0;
+
+    // 3. Calculate occupancy rate and average rent
+    final occupancyRate = totalRooms > 0
+        ? (occupiedRooms / totalRooms) * 100
+        : 0.0;
+    final averageRent = occupiedRooms > 0 ? totalRevenue / occupiedRooms : 0.0;
+
+    // 4. Fetch recent activities
+    final residentsSnapshot = await FirebaseFirestore.instance
+        .collectionGroup('residents')
+        .where('managerId', isEqualTo: managerId)
+        .orderBy('createdAt', descending: true)
+        .limit(5)
+        .get();
+
+    final recentActivity = residentsSnapshot.docs.map((doc) {
+      final data = doc.data();
+      return ActivityItem(
+        icon: Icons.person_add,
+        title: 'New Resident: ${data['name'] ?? 'N/A'}',
+        subtitle: 'Hostel: ${data['hostelName'] ?? 'N/A'}',
+      );
+    }).toList();
+
+    return {
+      'occupancyRate': occupancyRate,
+      'totalRevenue': totalRevenue,
+      'averageRent': averageRent,
+      'recentActivity': recentActivity,
+      'paidPercentage': paidPercentage,
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          QuickActions(),
-          SizedBox(height: 20),
-          Overview(),
-          SizedBox(height: 20),
-          KeyMetrics(),
-          SizedBox(height: 20),
-          PaymentStatus(),
-          SizedBox(height: 20),
-          RecentActivity(),
-        ],
-      ),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _fetchDashboardData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No data available.'));
+        }
+
+        final data = snapshot.data!;
+        final occupancyRate = data['occupancyRate'];
+        final totalRevenue = data['totalRevenue'];
+        final averageRent = data['averageRent'];
+        final recentActivity = data['recentActivity'] as List<ActivityItem>;
+        final paidPercentage = data['paidPercentage'] as double;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const QuickActions(),
+              const SizedBox(height: 20),
+              Overview(
+                occupancyRate: occupancyRate,
+                totalRevenue: totalRevenue,
+                averageRent: averageRent,
+              ),
+              const SizedBox(height: 20),
+              KeyMetrics(monthlyRevenue: totalRevenue),
+              const SizedBox(height: 20),
+              PaymentStatus(paidPercentage: paidPercentage),
+              const SizedBox(height: 20),
+              RecentActivity(activities: recentActivity),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -146,19 +270,39 @@ class QuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
+        Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
+            ActionButton(
+              label: 'Analytics',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
+                );
+              },
+            ),
+            ActionButton(
+              label: 'Broadcast Message',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BroadcastScreen()),
+                );
+              },
+            ),
+            ActionButton(
+              label: 'Add Hostel',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddHostelScreen()),
+                );
+              },
+            ),
             ActionButton(
               label: 'Add Resident',
               onTap: () {
@@ -173,7 +317,9 @@ class QuickActions extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const BookingsRequestScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const BookingsRequestScreen(),
+                  ),
                 );
               },
             ),
@@ -195,16 +341,20 @@ class QuickActions extends StatelessWidget {
             ActionButton(
               label: 'Room Matching',
               onTap: () {
-                Navigator.pushNamed(context, '/room_matching');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RoomMatchingScreen()),
+                );
               },
             ),
             ActionButton(
               label: 'Tenant Listing',
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) =>
-                      const AlertDialog(content: Text('Tenant Listing')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TenantListingScreen(),
+                  ),
                 );
               },
             ),
@@ -212,6 +362,26 @@ class QuickActions extends StatelessWidget {
               label: 'Maintenance Requests',
               onTap: () {
                 Navigator.pushNamed(context, '/maintenance');
+              },
+            ),
+            ActionButton(
+              label: 'View Documents',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ViewDocumentsScreen(),
+                  ),
+                );
+              },
+            ),
+            ActionButton(
+              label: 'Manage Expenses',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ExpensesScreen()),
+                );
               },
             ),
           ],
@@ -304,35 +474,46 @@ class _ActionButtonState extends State<ActionButton> {
 }
 
 class Overview extends StatelessWidget {
-  const Overview({super.key});
+  final double occupancyRate;
+  final double totalRevenue;
+  final double averageRent;
+
+  const Overview({
+    super.key,
+    required this.occupancyRate,
+    required this.totalRevenue,
+    required this.averageRent,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Overview',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
+        Text('Overview', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         Row(
-          children: const [
+          children: [
             Expanded(
-              child: OverviewCard(title: 'Occupancy Rate', value: '85%'),
+              child: OverviewCard(
+                title: 'Occupancy Rate',
+                value: '${occupancyRate.toStringAsFixed(1)}%',
+              ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
-              child: OverviewCard(title: 'Average Rent', value: 'Ugx 750,000'),
+              child: OverviewCard(
+                title: 'Average Rent',
+                value: 'Ugx ${averageRent.toStringAsFixed(0)}',
+              ),
             ),
           ],
         ),
         const SizedBox(height: 10),
-        const OverviewCard(title: 'Total Revenue', value: 'Ugx 20,000,000'),
+        OverviewCard(
+          title: 'Total Revenue',
+          value: 'Ugx ${totalRevenue.toStringAsFixed(0)}',
+        ),
       ],
     );
   }
@@ -354,18 +535,9 @@ class OverviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: coffeeBrown,
-              ),
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 16, color: coffeeBrown),
-            ),
+            Text(value, style: Theme.of(context).textTheme.bodyLarge),
           ],
         ),
       ),
@@ -374,21 +546,15 @@ class OverviewCard extends StatelessWidget {
 }
 
 class KeyMetrics extends StatelessWidget {
-  const KeyMetrics({super.key});
+  final double monthlyRevenue;
+  const KeyMetrics({super.key, required this.monthlyRevenue});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Key Metrics',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
+        Text('Key Metrics', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         Card(
           elevation: 2,
@@ -398,31 +564,28 @@ class KeyMetrics extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Monthly Revenue',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: coffeeBrown,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Ugx 5,000,000',
-                  style: TextStyle(color: coffeeBrown),
+                Text(
+                  'Ugx ${NumberFormat('#,###').format(monthlyRevenue)}',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Last 6 months: +15%',
-                  style: TextStyle(color: coffeeBrown),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 20),
                 Container(
                   height: 100,
                   color: coffeeBrown,
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     'Line Chart Placeholder',
-                    style: TextStyle(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
               ],
@@ -435,21 +598,15 @@ class KeyMetrics extends StatelessWidget {
 }
 
 class PaymentStatus extends StatelessWidget {
-  const PaymentStatus({super.key});
+  final double paidPercentage;
+  const PaymentStatus({super.key, required this.paidPercentage});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Payment Status',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
+        Text('Payment Status', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         Card(
           elevation: 2,
@@ -459,17 +616,20 @@ class PaymentStatus extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('90% Paid', style: TextStyle(color: coffeeBrown)),
+                Text(
+                  '${(paidPercentage * 100).toStringAsFixed(0)}% Paid',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
-                  value: 0.9,
+                  value: paidPercentage,
                   valueColor: const AlwaysStoppedAnimation<Color>(coffeeBrown),
                   backgroundColor: Colors.white,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'This month: +5%',
-                  style: TextStyle(color: coffeeBrown),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
@@ -481,37 +641,23 @@ class PaymentStatus extends StatelessWidget {
 }
 
 class RecentActivity extends StatelessWidget {
-  const RecentActivity({super.key});
+  final List<ActivityItem> activities;
+  const RecentActivity({super.key, this.activities = const []});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
-          'Recent Activity',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
-        SizedBox(height: 10),
-        ActivityItem(
-          icon: Icons.person_add,
-          title: 'New Resident: Ethan Carter',
-          subtitle: 'Room 203',
-        ),
-        ActivityItem(
-          icon: Icons.plumbing,
-          title: 'Maintenance: Leaky Faucet',
-          subtitle: 'Room 101',
-        ),
-        ActivityItem(
-          icon: Icons.payment,
-          title: 'Payment Received: Ugx 750,000',
-          subtitle: 'Room 205',
-        ),
+      children: [
+        Text('Recent Activity', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 10),
+        if (activities.isEmpty)
+          Text(
+            'No recent activity.',
+            style: Theme.of(context).textTheme.bodyLarge,
+          )
+        else
+          ...activities,
       ],
     );
   }
@@ -536,92 +682,8 @@ class ActivityItem extends StatelessWidget {
         backgroundColor: coffeeBrown,
         child: Icon(icon, color: Colors.white),
       ),
-      title: Text(title, style: const TextStyle(color: coffeeBrown)),
-      subtitle: Text(subtitle, style: const TextStyle(color: coffeeBrown)),
-    );
-  }
-}
-
-class PublishAddScreen extends StatefulWidget {
-  const PublishAddScreen({Key? key}) : super(key: key);
-
-  @override
-  State<PublishAddScreen> createState() => _PublishAddScreenState();
-}
-
-class _PublishAddScreenState extends State<PublishAddScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descController = TextEditingController();
-  String? _imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Publish Add')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty ? 'Enter a title' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-                validator: (v) => v == null || v.isEmpty ? 'Enter a description' : null,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.image),
-                    label: const Text('Upload Image'),
-                    onPressed: () async {
-                      // Placeholder for image picker
-                      setState(() {
-                        _imagePath = null; // Image should be fetched from backend
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  if (_imagePath != null)
-                    Text('Image selected', style: TextStyle(color: Colors.green)),
-                ],
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Published: ${_titleController.text}\n${_descController.text}${_imagePath != null ? '\nImage: $_imagePath' : ''}'),
-                      ),
-                    );
-                    _titleController.clear();
-                    _descController.clear();
-                    setState(() => _imagePath = null);
-                  }
-                },
-                child: const Text('Submit'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
     );
   }
 }

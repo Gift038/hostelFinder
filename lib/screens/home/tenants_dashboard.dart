@@ -9,11 +9,17 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../chat/conversations_screen.dart';
+// ignore: duplicate_import
 import '../../google_maps.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../tenant_dashboard/broadcast_messages_screen.dart';
+import '../tenant_dashboard/submit_maintenance_screen.dart';
+import '../tenant_dashboard/published_ads_screen.dart';
+//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TenantsDashboardScreen extends StatefulWidget {
   const TenantsDashboardScreen({super.key});
@@ -100,13 +106,39 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ProfileScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
         );
         break;
       case 3:
         Navigator.pushNamed(context, '/tenant_documents');
+        break;
+      case 4:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ConversationsScreen()),
+        );
+        break;
+      case 5:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BroadcastMessagesScreen(),
+          ),
+        );
+        break;
+      case 6:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SubmitMaintenanceScreen(),
+          ),
+        );
+        break;
+      case 7:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PublishedAdsScreen()),
+        );
         break;
     }
   }
@@ -114,13 +146,17 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   Future<List<Map<String, dynamic>>> _loadHostels() async {
     try {
       // Try Firestore first
-      final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('hostels')
+          .get();
       if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        return snapshot.docs.map((doc) => doc.data()).toList();
       }
     } catch (_) {}
     // Fallback to JSON
-    final String jsonString = await rootBundle.loadString('assets/hostels_updated.json');
+    final String jsonString = await rootBundle.loadString(
+      'assets/hostels_updated.json',
+    );
     final List<dynamic> jsonList = json.decode(jsonString);
     return jsonList.cast<Map<String, dynamic>>();
   }
@@ -166,14 +202,25 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
       try {
         List<Location> locations = await locationFromAddress(university);
         if (locations.isNotEmpty) {
-          final LatLng center = LatLng(locations[0].latitude, locations[0].longitude);
+          final LatLng center = LatLng(
+            locations[0].latitude,
+            locations[0].longitude,
+          );
           // Fetch all hostels from Firestore
-          final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
-          final allHostels = snapshot.docs.map((doc) => Hostel.fromFirestore(doc.data())).toList();
+          final snapshot = await FirebaseFirestore.instance
+              .collection('hostels')
+              .get();
+          final allHostels = snapshot.docs
+              .map((doc) => Hostel.fromFirestore(doc.data()))
+              .toList();
           // Filter hostels within 2km
           final filtered = allHostels.where((hostel) {
             final d = Geolocator.distanceBetween(
-              hostel.lat, hostel.lng, center.latitude, center.longitude);
+              hostel.lat,
+              hostel.lng,
+              center.latitude,
+              center.longitude,
+            );
             return d <= 2000;
           }).toList();
           setState(() {
@@ -194,9 +241,9 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
           _universityCenter = null;
           _filteredHostels = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('University not found.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('University not found.')));
       }
     }
   }
@@ -224,11 +271,15 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               children: [
                 Icon(Icons.map, size: 64, color: coffeeBrown),
                 const SizedBox(height: 16),
-                Text('Map not supported on web',
-                    style: TextStyle(fontSize: 18, color: coffeeBrown)),
+                Text(
+                  'Map not supported on web',
+                  style: TextStyle(fontSize: 18, color: coffeeBrown),
+                ),
                 const SizedBox(height: 8),
-                Text('Please use the mobile app for interactive maps.',
-                    style: TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(
+                  'Please use the mobile app for interactive maps.',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ],
             ),
           ),
@@ -239,7 +290,9 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         if (Platform.isAndroid || Platform.isIOS) {
           return Card(
             elevation: 8,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             margin: EdgeInsets.zero,
             child: GoogleMapsWidget(
               height: 450,
@@ -251,7 +304,9 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
           // Desktop platforms: show a static image or placeholder
           return Card(
             elevation: 8,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             margin: EdgeInsets.zero,
             child: SizedBox(
               height: 300,
@@ -262,11 +317,15 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   children: [
                     Icon(Icons.map, size: 64, color: coffeeBrown),
                     const SizedBox(height: 16),
-                    Text('Map not supported on desktop',
-                        style: TextStyle(fontSize: 18, color: coffeeBrown)),
+                    Text(
+                      'Map not supported on desktop',
+                      style: TextStyle(fontSize: 18, color: coffeeBrown),
+                    ),
                     const SizedBox(height: 8),
-                    Text('Please use the mobile app for interactive maps.',
-                        style: TextStyle(fontSize: 14, color: Colors.grey)),
+                    Text(
+                      'Please use the mobile app for interactive maps.',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
@@ -277,14 +336,14 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         // Platform not found (e.g., in tests)
         return Card(
           elevation: 8,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           margin: EdgeInsets.zero,
           child: SizedBox(
             height: 300,
             width: double.infinity,
-            child: Center(
-              child: Text('Map not supported on this platform'),
-            ),
+            child: Center(child: Text('Map not supported on this platform')),
           ),
         );
       }
@@ -294,9 +353,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   Widget _buildSearchResultsCard() {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 350,
         decoration: BoxDecoration(
@@ -340,24 +397,27 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               child: _loadingSearch
                   ? const Center(child: CircularProgressIndicator())
                   : _searchResults.isEmpty
-                      ? const Center(child: Text('No hostels found.'))
-                      : ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _searchResults.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, i) {
-                            final hostel = _searchResults[i];
-                            return _buildSearchResultItem(
-                              hostel['name'] ?? '',
-                              hostel['location'] ?? '',
-                              'UGX ${hostel['min_price'] ?? ''}/month',
-                              hostel['rating'] != null ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)' : '',
-                              (hostel['hostelImages'] != null && (hostel['hostelImages'] as List).isNotEmpty)
-                                  ? hostel['hostelImages'][0]
-                                  : '',
-                            );
-                          },
-                        ),
+                  ? const Center(child: Text('No hostels found.'))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _searchResults.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) {
+                        final hostel = _searchResults[i];
+                        return _buildSearchResultItem(
+                          hostel['name'] ?? '',
+                          hostel['location'] ?? '',
+                          'UGX ${hostel['min_price'] ?? ''}/month',
+                          hostel['rating'] != null
+                              ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)'
+                              : '',
+                          (hostel['hostelImages'] != null &&
+                                  (hostel['hostelImages'] as List).isNotEmpty)
+                              ? hostel['hostelImages'][0]
+                              : '',
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -365,7 +425,13 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     );
   }
 
-  Widget _buildSearchResultItem(String name, String location, String price, String rating, String imagePath) {
+  Widget _buildSearchResultItem(
+    String name,
+    String location,
+    String price,
+    String rating,
+    String imagePath,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -382,7 +448,10 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               height: 60,
               color: Colors.grey[300],
               child: Center(
-                child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+                child: Text(
+                  'Image goes here',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 10),
+                ),
               ),
             ),
           ),
@@ -401,10 +470,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                 const SizedBox(height: 4),
                 Text(
                   location,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -420,10 +486,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                     const Spacer(),
                     Text(
                       rating,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
                 ),
@@ -443,317 +506,247 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
           builder: (context, userProvider, child) {
             return Text(
               'Welcome, ${userProvider.name.isNotEmpty ? userProvider.name : 'Tenant'}',
-              style: const TextStyle(
-                color: Color(0xFF4B2E05),
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+              style: Theme.of(context).textTheme.titleLarge,
             );
           },
         ),
-        backgroundColor: const Color(0xFFF8F5F2),
-        foregroundColor: const Color(0xFF4B2E05),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.primary,
       ),
-      backgroundColor: const Color(0xFFF8F5F2),
-      body: CustomScrollView(
-        slivers: [
-          // University Search Bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: coffeeBrown.withAlpha(77)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: coffeeBrown.withAlpha(25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 600;
+          return CustomScrollView(
+            slivers: [
+              // University Search Bar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _universityController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter your destination university...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: coffeeBrown.withAlpha(77)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: coffeeBrown.withAlpha(25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        style: const TextStyle(fontSize: 16),
-                        onSubmitted: (_) => _handleUniversitySearch(),
-                      ),
+                      ],
                     ),
-                    if (_selectedUniversity.isNotEmpty)
-                      GestureDetector(
-                        onTap: _clearUniversitySearch,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.clear,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _handleUniversitySearch,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: coffeeBrown,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // General Search Bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: coffeeBrown.withAlpha(77)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: coffeeBrown.withAlpha(25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: _isSearching ? 'Search for more hostels...' : 'Search for hostels...',
-                          hintStyle: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
-                        ),
-                        style: const TextStyle(fontSize: 16),
-                        onSubmitted: (_) => _handleSearch(),
-                      ),
-                    ),
-                    if (_isSearching)
-                      GestureDetector(
-                        onTap: _clearSearch,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.clear,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => _handleSearch(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: coffeeBrown,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.send,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          _isSearching
-              ? SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: _buildSearchResultsCard(),
-                  ),
-                )
-              : SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Hostel Listings',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: coffeeBrown,
-                      ),
-                    ),
-                  ),
-                ),
-          _isSearching
-              ? const SliverToBoxAdapter(child: SizedBox.shrink())
-              : SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 150,
-                    child: ListView(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
+                    child: Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Makerere University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel1.jpg',
-                            title: 'Makerere University Hostels',
-                            subtitle: 'Find hostels near Makerere University',
+                        Expanded(
+                          child: TextField(
+                            controller: _universityController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter your destination university...',
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: const TextStyle(fontSize: 16),
+                            onSubmitted: (_) => _handleUniversitySearch(),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Kyambogo University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel2.jpg',
-                            title: 'Kyambogo University Hostels',
-                            subtitle: 'Find hostels near Kyambogo University',
+                        if (_selectedUniversity.isNotEmpty)
+                          GestureDetector(
+                            onTap: _clearUniversitySearch,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.clear,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                            ),
                           ),
-                        ),
+                        const SizedBox(width: 8),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Uganda Christian University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel3.jpg',
-                            title: 'Uganda Christian University Hostels',
-                            subtitle: 'Find hostels near UCU',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Victoria University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel5.jpg',
-                            title: 'Victoria University Hostels',
-                            subtitle: 'Find hostels near Victoria University',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Ndejje University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel6.jpg',
-                            title: 'Ndejje University Hostels',
-                            subtitle: 'Find hostels near Ndejje University',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Busitema University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel4.jpg',
-                            title: 'Busitema University Hostels',
-                            subtitle: 'Find hostels near Busitema University',
+                          onTap: _handleUniversitySearch,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: coffeeBrown,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _buildMapCard(),
-            ),
-          ),
-        ],
+              ),
+              // General Search Bar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: coffeeBrown.withAlpha(77)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: coffeeBrown.withAlpha(25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: _isSearching
+                                  ? 'Search for more hostels...'
+                                  : 'Search for hostels...',
+                              hintStyle: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: const TextStyle(fontSize: 16),
+                            onSubmitted: (_) => _handleSearch(),
+                          ),
+                        ),
+                        if (_isSearching)
+                          GestureDetector(
+                            onTap: _clearSearch,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.clear,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _handleSearch(),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: coffeeBrown,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              _isSearching
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildSearchResultsCard(),
+                      ),
+                    )
+                  : SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Hostel Listings',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: coffeeBrown,
+                          ),
+                        ),
+                      ),
+                    ),
+              // For hostel listings, use GridView for wide screens
+              if (!_isSearching && isWide)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.5,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                      itemCount: 6, // Example for demo, replace with real data
+                      itemBuilder: (context, index) => const HostelCard(
+                        imagePath: 'assets/hostel1.jpg',
+                        title: 'Modern Hostel',
+                        subtitle: 'Near University',
+                      ),
+                    ),
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildMapCard(),
+                ),
+              ),
+            ],
+          );
+        },
       ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[100],
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: coffeeBrown,
-        unselectedItemColor: lightCoffeeBrown,
-        currentIndex: _currentIndex,
-        onTap: _onNavTapped,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _onNavTapped,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.house_rounded),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
+          NavigationDestination(icon: Icon(Icons.payment), label: 'Payments'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+          NavigationDestination(
             icon: Icon(Icons.cases_rounded),
-            label: "Documents",
+            label: 'Documents',
           ),
+          NavigationDestination(icon: Icon(Icons.message), label: 'Messages'),
+          NavigationDestination(
+            icon: Icon(Icons.campaign),
+            label: 'Announcements',
+          ),
+          NavigationDestination(icon: Icon(Icons.build), label: 'Maintenance'),
+          NavigationDestination(icon: Icon(Icons.store), label: 'Browse Ads'),
         ],
       ),
     );

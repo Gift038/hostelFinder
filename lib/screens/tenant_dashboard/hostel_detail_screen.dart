@@ -1,126 +1,226 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../chat/chat_screen.dart';
 
 class HostelDetailScreen extends StatelessWidget {
   const HostelDetailScreen({super.key});
 
+  Future<String> _createOrGetChatRoom(String otherUserId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+    final currentUserRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+    final otherUserRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(otherUserId);
+    final ids = [user.uid, otherUserId];
+    ids.sort();
+    final chatRoomId = ids.join('_');
+    final chatRoomRef = FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(chatRoomId);
+    final doc = await chatRoomRef.get();
+    if (!doc.exists) {
+      await chatRoomRef.set({
+        'users': [user.uid, otherUserId],
+        'userRefs': [currentUserRef, otherUserRef],
+      });
+    }
+    return chatRoomId;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color coffeeBrown = const Color(0xFF4B2E05);
-    final Color lightCoffeeBrown = const Color(0xFF9C7A5F);
     final hostel = ModalRoute.of(context)?.settings.arguments as Map?;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5F2),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F5F2),
-        foregroundColor: Colors.brown,
-        elevation: 0,
         title: Text(hostel?['name'] ?? 'Hostel'),
-        leading: BackButton(color: coffeeBrown),
+        centerTitle: true,
       ),
       body: hostel == null
           ? const Center(child: Text('No hostel data.'))
           : ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    height: 180,
-                    width: double.infinity,
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text(
-                        'Image goes here',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
+                // Hostel Image (with Hero animation for modern effect)
+                Hero(
+                  tag: 'hostel_image_${hostel['name'] ?? ''}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child:
+                          hostel['imageUrls'] != null &&
+                              hostel['imageUrls'].isNotEmpty
+                          ? Image.network(
+                              hostel['imageUrls'][0],
+                              fit: BoxFit.cover,
+                            )
+                          : Center(
+                              child: Text(
+                                'No image',
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+                            ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   hostel['name'] ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   hostel['description'] ?? '',
-                  style: const TextStyle(fontSize: 15, color: Colors.black87),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 20),
                 if (hostel['rooms'] != null) ...[
-                  const Text('Room Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    'Room Options',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
-                  ...List.generate(hostel['rooms'].length, (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.bed_outlined, color: Colors.grey),
-                            const SizedBox(width: 8),
-                            Text(hostel['rooms'][i]['type'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8),
-                            Text(hostel['rooms'][i]['desc'], style: const TextStyle(color: Colors.grey)),
-                          ],
-                        ),
-                      )),
+                  ...List.generate(
+                    hostel['rooms'].length,
+                    (i) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.bed_outlined, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Text(
+                            hostel['rooms'][i]['type'],
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            hostel['rooms'][i]['desc'],
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                 ],
                 if (hostel['amenities'] != null) ...[
-                  const Text('Amenities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    'Amenities',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 8),
-                  ...List.generate(hostel['amenities'].length, (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_box, color: Colors.amber, size: 20),
-                            const SizedBox(width: 8),
-                            Text(hostel['amenities'][i], style: const TextStyle(fontSize: 15)),
-                          ],
+                  Wrap(
+                    spacing: 8,
+                    children: List.generate(
+                      hostel['amenities'].length,
+                      (i) => Chip(
+                        label: Text(hostel['amenities'][i]),
+                        avatar: const Icon(
+                          Icons.check_box,
+                          color: Colors.amber,
+                          size: 18,
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                 ],
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: coffeeBrown,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/matching_hostels');
-                    },
-                    child: const Text('Book Now', style: TextStyle(fontSize: 16)),
+                FilledButton.icon(
+                  icon: const Icon(Icons.bed),
+                  label: const Text('Book Now'),
+                  onPressed: () {
+                    if (hostel['rooms'] != null &&
+                        hostel['rooms'].isNotEmpty) {
+                      Navigator.pushNamed(
+                        context,
+                        '/booking',
+                        arguments: {
+                          'hostelName': hostel['name'],
+                          'roomType': hostel['rooms'][0]['type'],
+                          'roomPrice': hostel['rooms'][0]['price'],
+                        },
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No rooms available for booking.'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  icon: const Icon(Icons.message),
+                  label: const Text('Contact Manager'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                   ),
+                  onPressed: () async {
+                    try {
+                      final managerId =
+                          hostel['managerId'] as String? ??
+                          'manager_placeholder_id';
+                      final otherUserName =
+                          hostel['managerName'] as String? ?? 'Manager';
+                      if (managerId == 'manager_placeholder_id') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Manager information not available yet.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      final chatRoomId = await _createOrGetChatRoom(managerId);
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            chatRoomId: chatRoomId,
+                            otherUserName: otherUserName,
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Failed to start chat: \\${e.toString()}',
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[100],
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: coffeeBrown,
-        unselectedItemColor: lightCoffeeBrown,
-        currentIndex: 0,
-        onTap: (index) {},
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: 0,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.house_rounded),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
+          NavigationDestination(icon: Icon(Icons.payment), label: 'Payments'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+          NavigationDestination(
             icon: Icon(Icons.cases_rounded),
-            label: "Documents",
+            label: 'Documents',
           ),
         ],
+        onDestinationSelected: (_) {},
       ),
     );
   }
