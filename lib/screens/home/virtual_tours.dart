@@ -1,18 +1,226 @@
 //virtual_tours.dart file
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VirtualToursScreen extends StatelessWidget {
   const VirtualToursScreen({super.key});
 
+  Future<Map<String, dynamic>?> _fetchHostelById(String hostelId) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('hostels').doc(hostelId).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          // Add the document ID to the data map for reference
+          return {...data, 'id': doc.id};
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final String hostelName = args != null && args['hostelName'] != null ? args['hostelName'] : 'Virtual Tours';
-    final List rooms = args != null && args['rooms'] != null ? args['rooms'] : [];
-    final List amenities = args != null && args['amenities'] != null ? args['amenities'] : [];
-    final String location = args != null && args['location'] != null ? args['location'] : '';
-    final String details = args != null && args['details'] != null ? args['details'] : '';
+    final args = ModalRoute.of(context)?.settings.arguments;
+    // If args is a String, treat as hostelId; else, fallback to old Map logic
+    if (args is String) {
+      final String hostelId = args;
+      return FutureBuilder<Map<String, dynamic>?>(
+        future: _fetchHostelById(hostelId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Scaffold(
+              body: Center(child: Text('Hostel not found.')),
+            );
+          }
+          final hostel = snapshot.data!;
+          // Map Firestore fields to expected args
+          final String hostelName = hostel['name'] ?? 'Virtual Tours';
+          final List rooms = hostel['rooms'] ?? [];
+          final List amenities = hostel['amenities'] ?? [];
+          final String location = hostel['location'] ?? '';
+          final String details = hostel['details'] ?? '';
+          final List hostelImages = (hostel['hostelImages'] ?? hostel['imageUrls'] ?? []) as List;
+          final Color coffeeBrown = const Color(0xFF4B2E05);
+          final Color lightCoffeeBrown = const Color(0xFF9C7A5F);
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(hostelName),
+              backgroundColor: const Color(0xFFF8F5F2),
+              foregroundColor: coffeeBrown,
+            ),
+            backgroundColor: const Color(0xFFF8F5F2),
+            body: ListView(
+              padding: const EdgeInsets.all(0),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Card(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: _HostelImageCarousel(
+                        images: hostelImages.isNotEmpty ? List<String>.from(hostelImages) : [],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  child: Card(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            hostelName,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: coffeeBrown,
+                            ),
+                          ),
+                          if (details.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              details,
+                              style: const TextStyle(fontSize: 16, color: Colors.black87),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          Text('Room Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: coffeeBrown)),
+                          const SizedBox(height: 12),
+                          ...rooms.map<Widget>((room) => _RoomOptionCard(room: room, coffeeBrown: coffeeBrown, lightCoffeeBrown: lightCoffeeBrown, showBooking: false)),
+                          const SizedBox(height: 24),
+                          Text('Amenities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: coffeeBrown)),
+                          const SizedBox(height: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _AmenityCheckbox(
+                                label: 'Swimming Pool',
+                                checked: amenities.contains('Swimming Pool'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Gym',
+                                checked: amenities.contains('Gym'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Parking Space',
+                                checked: amenities.contains('Parking Space'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Wi-Fi',
+                                checked: amenities.contains('Wi-Fi'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Laundry Room',
+                                checked: amenities.contains('Laundry Room'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Hang Line',
+                                checked: amenities.contains('Hang Line'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Study Room',
+                                checked: amenities.contains('Study Room'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Shared Kitchen',
+                                checked: amenities.contains('Shared Kitchen'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Playground',
+                                checked: amenities.contains('Playground'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                              const SizedBox(height: 2),
+                              _AmenityCheckbox(
+                                label: 'Enhanced Security',
+                                checked: amenities.contains('Enhanced Security'),
+                                coffeeBrown: coffeeBrown,
+                                lightCoffeeBrown: lightCoffeeBrown,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Text('Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: coffeeBrown)),
+                          const SizedBox(height: 12),
+                          Container(
+                            height: 200,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: coffeeBrown.withAlpha(51)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Google Map Placeholder\n( ${location.isNotEmpty ? location : 'Hostel Location'})',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: coffeeBrown, fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+    // Fallback: old logic (for dev/testing)
+    final Map? mapArgs = args as Map?;
+    final String hostelName = mapArgs != null && mapArgs['hostelName'] != null ? mapArgs['hostelName'] : 'Virtual Tours';
+    final List rooms = mapArgs != null && mapArgs['rooms'] != null ? mapArgs['rooms'] : [];
+    final List amenities = mapArgs != null && mapArgs['amenities'] != null ? mapArgs['amenities'] : [];
+    final String location = mapArgs != null && mapArgs['location'] != null ? mapArgs['location'] : '';
+    final String details = mapArgs != null && mapArgs['details'] != null ? mapArgs['details'] : '';
+    final List hostelImages = (mapArgs != null && mapArgs['hostelImages'] != null) ? mapArgs['hostelImages'] : [];
     final Color coffeeBrown = const Color(0xFF4B2E05);
     final Color lightCoffeeBrown = const Color(0xFF9C7A5F);
 
@@ -26,7 +234,6 @@ class VirtualToursScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(0),
         children: [
-          // Hostel Images Carousel Card
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Card(
@@ -36,16 +243,7 @@ class VirtualToursScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: _HostelImageCarousel(
-                  images: (args != null && args['hostelImages'] != null && (args['hostelImages'] as List).isNotEmpty)
-                      ? List<String>.from(args['hostelImages'])
-                      : [
-                          'assets/hostel1.jpg',
-                          'assets/hostel2.jpg',
-                          'assets/hostel3.jpg',
-                          'assets/hostel4.jpeg',
-                          'assets/hostel5.jpg',
-                          'assets/hostel6.jpg',
-                        ],
+                  images: hostelImages.isNotEmpty ? List<String>.from(hostelImages) : [],
                 ),
               ),
             ),
@@ -170,7 +368,7 @@ class VirtualToursScreen extends StatelessWidget {
                       ),
                               child: Center(
                                 child: Text(
-                          'Google Map Placeholder\n(${location.isNotEmpty ? location : 'Hostel Location'})',
+                          'Google Map Placeholder\n( ${location.isNotEmpty ? location : 'Hostel Location'})',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: coffeeBrown, fontWeight: FontWeight.w600, fontSize: 16),
                                 ),
@@ -203,19 +401,12 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
   Timer? _timer;
 
   List<String> get images {
-    // Use at least 6 images for demonstration; fallback to a default set if not enough provided
-    final imgs = (widget.room['images'] as List<String>?) ?? [];
-    if (imgs.length >= 6) return imgs;
-    // Add placeholder images if less than 6
-    return [
-      ...imgs,
-      'assets/hostel1.jpg',
-      'assets/hostel2.jpg',
-      'assets/hostel3.jpg',
-      'assets/hostel4.jpeg',
-      'assets/hostel5.jpg',
-      'assets/hostel1.jpg',
-    ].take(6).toList();
+    // Fix: Always cast to List<String> even if Firestore returns List<dynamic>
+    final imgsRaw = widget.room['images'];
+    if (imgsRaw is List) {
+      return imgsRaw.map((e) => e.toString()).toList();
+    }
+    return <String>[];
   }
 
   @override
@@ -254,7 +445,7 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
           children: [
             // Animated image carousel
             SizedBox(
-              height: 120,
+              height: 180,
               child: Stack(
                 children: [
                   AnimatedSwitcher(
@@ -262,11 +453,18 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
                     child: ClipRRect(
                       key: ValueKey(_currentImage),
                       borderRadius: BorderRadius.circular(12),
-                      child: Container(
+                      child: images.isNotEmpty
+                          ? Image.network(
+                        images[_currentImage],
                         width: double.infinity,
-                        height: 120,
-                        color: Colors.grey[300],
-                        child: Center(child: Text('Image goes here', style: TextStyle(color: Colors.grey[700]))),
+                              height: 180,
+                        fit: BoxFit.cover,
+                            )
+                          : Container(
+                              width: double.infinity,
+                              height: 180,
+                              color: Colors.grey[300],
+                              child: Center(child: Text('No Images', style: TextStyle(color: Colors.grey[700]))),
                       ),
                     ),
                   ),
@@ -351,6 +549,8 @@ class _RoomOptionCardState extends State<_RoomOptionCard> {
               lightCoffeeBrown: lightCoffeeBrown,
               roomType: room['type'],
               enabled: !fullyBooked,
+              price: room['price'],
+              room: room,
             ),
           ],
         ),
@@ -364,7 +564,9 @@ class _BookNowButton extends StatefulWidget {
   final Color lightCoffeeBrown;
   final String? roomType;
   final bool enabled;
-  const _BookNowButton({required this.coffeeBrown, required this.lightCoffeeBrown, this.roomType, this.enabled = true});
+  final int? price;
+  final Map? room;
+  const _BookNowButton({required this.coffeeBrown, required this.lightCoffeeBrown, this.roomType, this.enabled = true, this.price, this.room});
 
   @override
   State<_BookNowButton> createState() => _BookNowButtonState();
@@ -381,8 +583,10 @@ class _BookNowButtonState extends State<_BookNowButton> {
       child: GestureDetector(
         onTap: widget.enabled
             ? () {
-                Navigator.pushNamed(context, '/booking', arguments: {
-                  if (widget.roomType != null) 'roomType': widget.roomType,
+                Navigator.pushNamed(context, '/payment', arguments: {
+                  'total': widget.price ?? 0,
+                  'roomType': widget.roomType,
+                  'room': widget.room,
                 });
               }
             : null,

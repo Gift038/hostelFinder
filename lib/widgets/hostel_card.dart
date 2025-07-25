@@ -22,7 +22,26 @@ class HostelCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         color: Colors.grey[300],
       ),
-      child: Container(
+      child: Stack(
+        children: [
+          if (imagePath.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imagePath,
+                width: 200,
+                height: double.infinity,
+          fit: BoxFit.cover,
+        ),
+            )
+          else
+            Center(
+              child: Text(
+                'Image goes here',
+                style: TextStyle(color: Colors.grey[700], fontSize: 12),
+              ),
+            ),
+          Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
@@ -37,12 +56,6 @@ class HostelCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Text(
-                  'Image goes here',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                ),
-              ),
               Text(
                 title,
                 style: const TextStyle(
@@ -59,6 +72,8 @@ class HostelCard extends StatelessWidget {
             ],
           ),
         ),
+          ),
+        ],
       ),
     );
   }

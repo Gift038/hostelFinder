@@ -241,11 +241,11 @@ class _DashboardContentState extends State<DashboardContent> {
         }
 
         final data = snapshot.data!;
-        final occupancyRate = data['occupancyRate'] as double;
-        final totalRevenue = data['totalRevenue'] as double;
-        final averageRent = data['averageRent'] as double;
+        final occupancyRate = (data['occupancyRate'] as double?) ?? 0.0;
+        final totalRevenue = (data['totalRevenue'] as double?) ?? 0.0;
+        final averageRent = (data['averageRent'] as double?) ?? 0.0;
         final recentActivity = data['recentActivity'] as List<ActivityItem>;
-        final paidPercentage = data['paidPercentage'] as double;
+        final paidPercentage = (data['paidPercentage'] as double?) ?? 0.0;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
