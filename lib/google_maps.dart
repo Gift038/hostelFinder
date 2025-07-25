@@ -1109,10 +1109,10 @@ class _GoogleMapsWidgetState extends State<GoogleMapsWidget> {
   }
 
   void _updateSearchSuggestions(String query) {
-    if (query.isEmpty) {
+   if (query.isEmpty) {
       _searchSuggestions = [];
       return;
-    }
+   }
 
     // Combine history matches and hostel matches
     final Set<String> suggestions = {};

@@ -13,8 +13,8 @@ import '../manager_dashboard/broadcast_screen.dart';
 import '../manager_dashboard/analytics_screen.dart';
 import '../manager_dashboard/publish_addscreen.dart';
 import '../manager_dashboard/room_matching.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Added for Firestore
-import 'package:firebase_auth/firebase_auth.dart'; // Added for FirebaseAuth
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth
 import '../manager_dashboard/view_documents_screen.dart';
 import '../manager_dashboard/expenses_screen.dart';
 import 'package:intl/intl.dart';
@@ -134,6 +134,7 @@ class _DashboardContentState extends State<DashboardContent> {
         'totalRevenue': 0.0,
         'averageRent': 0.0,
         'recentActivity': <ActivityItem>[],
+        'paidPercentage': 0.0,
       };
     }
 
@@ -154,8 +155,6 @@ class _DashboardContentState extends State<DashboardContent> {
     }
 
     // 2. Fetch this month's successful payments to calculate revenue
-    // Note: This query may require a custom index in Firestore.
-    // Check your debug console for a link to create it if you get an error.
     double totalRevenue = 0.0;
     int successfulPayments = 0;
     final now = DateTime.now();
@@ -166,7 +165,7 @@ class _DashboardContentState extends State<DashboardContent> {
         .collection('payments')
         .where('managerId', isEqualTo: managerId)
         .where('date', isGreaterThanOrEqualTo: startOfMonth)
-        .where('date', isLessThan: endOfMonth)
+        .where('date', isLessThanOrEqualTo: endOfMonth)
         .get();
 
     for (final paymentDoc in paymentsSnapshot.docs) {
@@ -188,15 +187,27 @@ class _DashboardContentState extends State<DashboardContent> {
         : 0.0;
     final averageRent = occupiedRooms > 0 ? totalRevenue / occupiedRooms : 0.0;
 
-    // 4. Fetch recent activities
+    // 4. Fetch recent activities WITHOUT ordering in query to avoid composite index error
     final residentsSnapshot = await FirebaseFirestore.instance
         .collectionGroup('residents')
         .where('managerId', isEqualTo: managerId)
-        .orderBy('createdAt', descending: true)
-        .limit(5)
+        .limit(20) // Fetch more and sort locally to get latest 5
         .get();
 
-    final recentActivity = residentsSnapshot.docs.map((doc) {
+    // Sort locally by createdAt descending
+    final sortedDocs = residentsSnapshot.docs.toList();
+    sortedDocs.sort((a, b) {
+      final aTimestamp = a.data()['createdAt'] as Timestamp?;
+      final bTimestamp = b.data()['createdAt'] as Timestamp?;
+      if (aTimestamp == null && bTimestamp == null) return 0;
+      if (aTimestamp == null) return 1;
+      if (bTimestamp == null) return -1;
+      return bTimestamp.compareTo(aTimestamp);
+    });
+
+    final recentActivityDocs = sortedDocs.take(5);
+
+    final recentActivity = recentActivityDocs.map((doc) {
       final data = doc.data();
       return ActivityItem(
         icon: Icons.person_add,
@@ -230,9 +241,9 @@ class _DashboardContentState extends State<DashboardContent> {
         }
 
         final data = snapshot.data!;
-        final occupancyRate = data['occupancyRate'];
-        final totalRevenue = data['totalRevenue'];
-        final averageRent = data['averageRent'];
+        final occupancyRate = data['occupancyRate'] as double;
+        final totalRevenue = data['totalRevenue'] as double;
+        final averageRent = data['averageRent'] as double;
         final recentActivity = data['recentActivity'] as List<ActivityItem>;
         final paidPercentage = data['paidPercentage'] as double;
 
@@ -420,51 +431,26 @@ class _ActionButtonState extends State<ActionButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        transform: _isHovering
-            ? (Matrix4.identity()..scale(1.05))
-            : Matrix4.identity(),
-        decoration: BoxDecoration(
-          color: getButtonColor(),
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: _isHovering
-              ? [
-                  BoxShadow(
-                    color: coffeeBrown.withAlpha((255 * 0.25).toInt()),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () {
-              setState(() {
-                _isPressed = true;
-              });
-              Future.delayed(const Duration(milliseconds: 100), () {
-                setState(() {
-                  _isPressed = false;
-                });
-                if (widget.onTap != null) widget.onTap!();
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              alignment: Alignment.center,
-              child: Text(
-                widget.label,
-                style: TextStyle(
-                  color: getTextColor(),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onTap?.call();
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: getButtonColor(),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: coffeeBrown),
+          ),
+          child: Text(
+            widget.label,
+            style: TextStyle(
+              color: getTextColor(),
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -487,203 +473,184 @@ class Overview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Overview', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: OverviewCard(
-                title: 'Occupancy Rate',
-                value: '${occupancyRate.toStringAsFixed(1)}%',
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: OverviewCard(
-                title: 'Average Rent',
-                value: 'Ugx ${averageRent.toStringAsFixed(0)}',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        OverviewCard(
-          title: 'Total Revenue',
-          value: 'Ugx ${totalRevenue.toStringAsFixed(0)}',
-        ),
-      ],
+    TextStyle titleStyle = Theme.of(context).textTheme.titleMedium!;
+    TextStyle valueStyle = Theme.of(
+      context,
+    ).textTheme.headlineSmall!.copyWith(color: coffeeBrown);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: dirtyBrownWhite,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildInfoItem(
+            'Occupancy Rate',
+            '${occupancyRate.toStringAsFixed(1)}%',
+            titleStyle,
+            valueStyle,
+          ),
+          _buildInfoItem(
+            'Total Revenue',
+            '\$${totalRevenue.toStringAsFixed(2)}',
+            titleStyle,
+            valueStyle,
+          ),
+          _buildInfoItem(
+            'Average Rent',
+            '\$${averageRent.toStringAsFixed(2)}',
+            titleStyle,
+            valueStyle,
+          ),
+        ],
+      ),
     );
   }
-}
 
-class OverviewCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const OverviewCard({super.key, required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(value, style: Theme.of(context).textTheme.bodyLarge),
-          ],
-        ),
-      ),
+  Widget _buildInfoItem(
+    String title,
+    String value,
+    TextStyle titleStyle,
+    TextStyle valueStyle,
+  ) {
+    return Column(
+      children: [
+        Text(title, style: titleStyle),
+        const SizedBox(height: 6),
+        Text(value, style: valueStyle),
+      ],
     );
   }
 }
 
 class KeyMetrics extends StatelessWidget {
   final double monthlyRevenue;
+
   const KeyMetrics({super.key, required this.monthlyRevenue});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Key Metrics', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 10),
-        Card(
-          elevation: 2,
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Monthly Revenue',
+    final currencyFormat = NumberFormat.currency(symbol: '\$');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: dirtyBrownWhite,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Key Metrics', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Monthly Revenue:',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Ugx ${NumberFormat('#,###').format(monthlyRevenue)}',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Last 6 months: +15%',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  height: 100,
-                  color: coffeeBrown,
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Line Chart Placeholder',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Text(
+                currencyFormat.format(monthlyRevenue),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 class PaymentStatus extends StatelessWidget {
   final double paidPercentage;
+
   const PaymentStatus({super.key, required this.paidPercentage});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Payment Status', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 10),
-        Card(
-          elevation: 2,
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${(paidPercentage * 100).toStringAsFixed(0)}% Paid',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: paidPercentage,
-                  valueColor: const AlwaysStoppedAnimation<Color>(coffeeBrown),
-                  backgroundColor: Colors.white,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'This month: +5%',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
+    final percentage = (paidPercentage * 100).toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: dirtyBrownWhite,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Payment Status', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(
+            value: paidPercentage,
+            backgroundColor: Colors.brown.shade100,
+            color: coffeeBrown,
+            minHeight: 12,
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            '$percentage% Paid',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 }
 
 class RecentActivity extends StatelessWidget {
   final List<ActivityItem> activities;
-  const RecentActivity({super.key, this.activities = const []});
+
+  const RecentActivity({super.key, required this.activities});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Recent Activity', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 10),
-        if (activities.isEmpty)
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: dirtyBrownWhite,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            'No recent activity.',
-            style: Theme.of(context).textTheme.bodyLarge,
-          )
-        else
-          ...activities,
-      ],
+            'Recent Activity',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 10),
+          if (activities.isEmpty)
+            Text(
+              'No recent activity.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
+          else
+            ...activities.map(
+              (activity) => ListTile(
+                leading: Icon(activity.icon, color: coffeeBrown),
+                title: Text(activity.title),
+                subtitle: Text(activity.subtitle),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
 
-class ActivityItem extends StatelessWidget {
+class ActivityItem {
   final IconData icon;
   final String title;
   final String subtitle;
 
-  const ActivityItem({
-    super.key,
+  ActivityItem({
     required this.icon,
     required this.title,
     required this.subtitle,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: coffeeBrown,
-        child: Icon(icon, color: Colors.white),
-      ),
-      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
-      subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
-    );
-  }
 }
