@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
-  const AppBottomNav({Key? key, required this.currentIndex}) : super(key: key);
+  const AppBottomNav({super.key, required this.currentIndex});
 
   static const Color coffeeBrown = Color(0xFF4B2E05);
   static const Color lightCoffeeBrown = Color(0xFF9C7A5F);

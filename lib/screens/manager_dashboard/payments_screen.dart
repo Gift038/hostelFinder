@@ -1,128 +1,217 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({super.key});
 
   @override
-  State<PaymentsScreen> createState() => _PaymentsScreenState();
+  //ignore: library_private_types_in_public_api
+  _PaymentsScreenState createState() => _PaymentsScreenState();
 }
 
 class _PaymentsScreenState extends State<PaymentsScreen> {
-  final List<Map<String, dynamic>> _requests = [
-    {
-      'title': 'Leaky Faucet',
-      'description': 'Room 101 - Faucet is leaking.',
-      'resolved': false,
-    },
-    {
-      'title': 'Broken Window',
-      'description': 'Room 203 - Window needs replacement.',
-      'resolved': false,
-    },
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late Future<Map<String, dynamic>> _paymentsDataFuture;
 
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _paymentsDataFuture = _fetchPaymentsData();
+  }
 
-  void _addRequest() {
-    if (_titleController.text.isNotEmpty && _descController.text.isNotEmpty) {
-      setState(() {
-        _requests.add({
-          'title': _titleController.text,
-          'description': _descController.text,
-          'resolved': false,
-        });
-        _titleController.clear();
-        _descController.clear();
-      });
-      Navigator.pop(context);
+  Future<Map<String, dynamic>> _fetchPaymentsData() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return {
+        'revenue': 0.0,
+        'outstanding': 0.0,
+        'transactions': <QueryDocumentSnapshot>[],
+      };
     }
-  }
 
-  void _showAddRequestDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New Maintenance Request'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            TextField(
-              controller: _descController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: _addRequest,
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
+    double totalRevenue = 0.0;
+    double totalOutstanding = 0.0;
 
-  void _toggleResolved(int index) {
-    setState(() {
-      _requests[index]['resolved'] = !_requests[index]['resolved'];
+    // 1. Get all payments for the current manager
+    final paymentsSnapshot = await _firestore
+        .collection('payments')
+        .where('managerId', isEqualTo: user.uid)
+        .get();
+
+    final allTransactions = paymentsSnapshot.docs;
+
+    for (var paymentDoc in allTransactions) {
+      final data = paymentDoc.data();
+      final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
+      final status = data['status'] as String?;
+      final date = (data['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+
+      if (status == 'Success' &&
+          date.month == DateTime.now().month &&
+          date.year == DateTime.now().year) {
+        totalRevenue += amount;
+      }
+      if (status == 'Pending' || status == 'Failed') {
+        totalOutstanding += amount;
+      }
+    }
+
+    // Sort transactions by date
+    allTransactions.sort((a, b) {
+      final aData = a.data();
+      final bData = b.data();
+      final aDate = (aData['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final bDate = (bData['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+      return bDate.compareTo(aDate);
     });
-  }
 
-  void _deleteRequest(int index) {
-    setState(() {
-      _requests.removeAt(index);
-    });
+    return {
+      'revenue': totalRevenue,
+      'outstanding': totalOutstanding,
+      'transactions': allTransactions,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(
+      locale: 'en_UG',
+      symbol: 'UGX ',
+    );
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: const Text('Payments Overview'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => setState(() {
+              _paymentsDataFuture = _fetchPaymentsData();
+            }),
+          ),
+        ],
       ),
-      body: ListView.builder(
-        itemCount: _requests.length,
-        itemBuilder: (context, index) {
-          final req = _requests[index];
-          return Card(
-            child: ListTile(
-              title: Text(req['title']),
-              subtitle: Text(req['description']),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      req['resolved'] ? Icons.check_circle : Icons.radio_button_unchecked,
-                      color: req['resolved'] ? Colors.green : Colors.grey,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _paymentsDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('No payment data available.'));
+          }
+
+          final data = snapshot.data!;
+          final double revenue = data['revenue'];
+          final double outstanding = data['outstanding'];
+          final List<QueryDocumentSnapshot> transactions =
+              data['transactions'] as List<QueryDocumentSnapshot>;
+
+          return Column(
+            children: [
+              // Summary Section
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildSummaryCard(
+                      'Revenue (This Month)',
+                      currencyFormat.format(revenue),
+                      Colors.green,
                     ),
-                    onPressed: () => _toggleResolved(index),
-                    tooltip: req['resolved'] ? 'Mark as unresolved' : 'Mark as resolved',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteRequest(index),
-                    tooltip: 'Delete',
-                  ),
-                ],
+                    _buildSummaryCard(
+                      'Outstanding',
+                      currencyFormat.format(outstanding),
+                      Colors.red,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const Divider(thickness: 1),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Recent Transactions',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              // Transaction List
+              Expanded(
+                child: transactions.isEmpty
+                    ? const Center(child: Text('No transactions yet.'))
+                    : ListView.builder(
+                        itemCount: transactions.length,
+                        itemBuilder: (context, index) {
+                          final doc = transactions[index];
+                          final paymentData =
+                              doc.data() as Map<String, dynamic>;
+                          final status = paymentData['status'] ?? 'N/A';
+                          final date =
+                              (paymentData['date'] as Timestamp?)?.toDate() ??
+                              DateTime.now();
+
+                          return ListTile(
+                            leading: Icon(
+                              status == 'Success'
+                                  ? Icons.check_circle
+                                  : (status == 'Pending'
+                                        ? Icons.hourglass_empty
+                                        : Icons.cancel),
+                              color: status == 'Success'
+                                  ? Colors.green
+                                  : (status == 'Pending'
+                                        ? Colors.orange
+                                        : Colors.red),
+                            ),
+                            title: Text(
+                              'Amount: ${currencyFormat.format(paymentData['amount'] ?? 0)}',
+                            ),
+                            subtitle: Text(
+                              'Tenant: ${paymentData['tenantName'] ?? 'N/A'}\nDate: ${DateFormat.yMMMd().format(date)}',
+                            ),
+                            trailing: Text(status),
+                          );
+                        },
+                      ),
+              ),
+            ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddRequestDialog,
-        tooltip: 'Add Maintenance Request',
-        child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildSummaryCard(String title, String value, Color color) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

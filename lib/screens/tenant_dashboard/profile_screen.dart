@@ -3,70 +3,230 @@ import 'package:provider/provider.dart';
 import '../../main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-const Color coffeeBrown = Color(0xFF6F4E37); // Coffee brown
-const Color lightCoffee = Color(0xFFD7CCC8); // Light coffee brown
-
-class UserProfile {
-  final String name;
-  final String email;
-  final String gender;
-  final String contactInfo;
-  final String joinedYear;
-  final String avatarUrl;
-  final List<PaymentHistory> paymentHistory;
-
-  UserProfile({
-    required this.name,
-    required this.email,
-    required this.gender,
-    required this.contactInfo,
-    required this.joinedYear,
-    required this.avatarUrl,
-    required this.paymentHistory,
-  });
-}
-
-class PaymentHistory {
-  final String title;
-  final String date;
-  final String roomType;
-  final String amount;
-
-  PaymentHistory({
-    required this.title,
-    required this.date,
-    required this.roomType,
-    required this.amount,
-  });
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  final String? userId;
+  const ProfileScreen({super.key, this.userId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  File? _imageFile;
-  final picker = ImagePicker();
-
-  late TextEditingController nameController;
-  late TextEditingController genderController;
-  late TextEditingController schoolController;
-  late TextEditingController programmeController;
-  late TextEditingController yearOfStudyController;
+  late Future<DocumentSnapshot> _userFuture;
+  bool get _isMyProfile => widget.userId == null;
 
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    nameController = TextEditingController(text: userProvider.name);
-    genderController = TextEditingController(text: userProvider.gender);
-    schoolController = TextEditingController(text: userProvider.school);
-    programmeController = TextEditingController(text: userProvider.programme);
-    yearOfStudyController = TextEditingController(text: userProvider.yearOfStudy);
+    final userId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+      _userFuture = Future.error('No user ID found');
+    } else {
+      _userFuture = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isMyProfile ? 'My Profile' : 'Tenant Profile'),
+        centerTitle: true,
+      ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future: _userFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              !snapshot.data!.exists) {
+            return const Center(child: Text('User not found.'));
+          }
+
+          final userData = snapshot.data!.data() as Map<String, dynamic>;
+
+          return ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              _ProfileHeader(
+                userData: userData,
+                isMyProfile: _isMyProfile,
+                onProfileUpdate: () => setState(() {
+                  _userFuture = FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(
+                        widget.userId ?? FirebaseAuth.instance.currentUser!.uid,
+                      )
+                      .get();
+                }),
+              ),
+              const SizedBox(height: 24),
+              _BioCard(userData: userData, isMyProfile: _isMyProfile),
+              if (!_isMyProfile) ...[
+                const SizedBox(height: 24),
+                _PaymentHistoryCard(userId: widget.userId!),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ProfileHeader extends StatefulWidget {
+  final Map<String, dynamic> userData;
+  final bool isMyProfile;
+  final VoidCallback onProfileUpdate;
+
+  const _ProfileHeader({
+    required this.userData,
+    required this.isMyProfile,
+    required this.onProfileUpdate,
+  });
+
+  @override
+  State<_ProfileHeader> createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<_ProfileHeader> {
+  File? _imageFile;
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadImage() async {
+    if (!widget.isMyProfile) return;
+
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile == null) return;
+
+    setState(() {
+      _imageFile = File(pickedFile.path);
+      _isUploading = true;
+    });
+
+    try {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      final ref = FirebaseStorage.instance.ref().child('user_avatars/$userId');
+      final uploadTask = await ref.putFile(_imageFile!);
+      final avatarUrl = await uploadTask.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'avatarUrl': avatarUrl,
+      });
+
+      widget.onProfileUpdate(); // Refresh the profile
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload image.')),
+        );
+      }
+    } finally {
+      setState(() => _isUploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final avatarUrl = widget.userData['avatarUrl'] as String?;
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 52,
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: _imageFile != null
+                    ? FileImage(_imageFile!)
+                    : (avatarUrl != null ? NetworkImage(avatarUrl) : null)
+                          as ImageProvider?,
+                child: (_imageFile == null && avatarUrl == null)
+                    ? const Icon(Icons.person, size: 60)
+                    : null,
+              ),
+            ),
+            if (widget.isMyProfile)
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: _isUploading
+                    ? const CircularProgressIndicator()
+                    : IconButton(
+                        icon: CircleAvatar(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          child: const Icon(Icons.edit, color: Colors.white),
+                        ),
+                        onPressed: _pickAndUploadImage,
+                      ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          widget.userData['fullName'] ?? 'Your Name',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          widget.userData['email'] ?? 'your.email@example.com',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ],
+    );
+  }
+}
+
+class _BioCard extends StatefulWidget {
+  final Map<String, dynamic> userData;
+  final bool isMyProfile;
+
+  const _BioCard({required this.userData, required this.isMyProfile});
+
+  @override
+  State<_BioCard> createState() => _BioCardState();
+}
+
+class _BioCardState extends State<_BioCard> {
+  bool _isEditing = false;
+
+  late final TextEditingController nameController;
+  late final TextEditingController genderController;
+  late final TextEditingController schoolController;
+  late final TextEditingController programmeController;
+  late final TextEditingController yearOfStudyController;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: widget.userData['fullName']);
+    genderController = TextEditingController(text: widget.userData['gender']);
+    schoolController = TextEditingController(text: widget.userData['school']);
+    programmeController = TextEditingController(
+      text: widget.userData['programme'],
+    );
+    yearOfStudyController = TextEditingController(
+      text: widget.userData['yearOfStudy'],
+    );
   }
 
   @override
@@ -79,187 +239,181 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-    }
-  }
-
-  void _saveBioData() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    userProvider.setUser(
+  void _saveBioData() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'fullName': nameController.text,
+      'gender': genderController.text,
+      'school': schoolController.text,
+      'programme': programmeController.text,
+      'yearOfStudy': yearOfStudyController.text,
+    });
+    // Update local provider state as well
+    Provider.of<UserProvider>(context, listen: false).setUser(
       name: nameController.text,
-      contact: userProvider.contact,
+      contact: widget.userData['contact'] ?? '',
       gender: genderController.text,
-      email: userProvider.email,
+      email: widget.userData['email'] ?? '',
       school: schoolController.text,
       programme: programmeController.text,
       yearOfStudy: yearOfStudyController.text,
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile updated!')),
-    );
-    setState(() {});
+
+    setState(() => _isEditing = false);
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Profile updated!')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final Color coffeeBrown = const Color(0xFF4B2E05);
-    final Color brown = const Color(0xFF8D6E63);
-    final Color white = Colors.white;
-    return Scaffold(
-      backgroundColor: white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F5F2),
-        foregroundColor: coffeeBrown,
-        elevation: 0,
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 32),
-            // Avatar and name/email
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundColor: brown,
-                      backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
-                      child: _imageFile == null ? Icon(Icons.person, size: 60, color: white) : null,
-                    ),
-                    Positioned(
-                      bottom: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: coffeeBrown,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          padding: const EdgeInsets.all(4),
-                          child: const Icon(Icons.add, color: Colors.white, size: 20),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  userProvider.name.isNotEmpty ? userProvider.name : 'Your Name',
-                  style: const TextStyle(
-                    color: Color(0xFF4B2E05),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                Text('Bio Data', style: Theme.of(context).textTheme.titleLarge),
+                if (widget.isMyProfile)
+                  IconButton(
+                    icon: Icon(_isEditing ? Icons.close : Icons.edit),
+                    onPressed: () => setState(() => _isEditing = !_isEditing),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  userProvider.email.isNotEmpty ? userProvider.email : 'Email',
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 16,
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                color: white,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Bio Data',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Color(0xFF4B2E05),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      _buildBioField(
-                        controller: nameController,
-                        icon: Icons.person,
-                        label: 'Name',
-                      ),
-                      const SizedBox(height: 14),
-                      _buildBioField(
-                        controller: genderController,
-                        icon: Icons.wc,
-                        label: 'Gender',
-                      ),
-                      const SizedBox(height: 14),
-                      _buildBioField(
-                        controller: schoolController,
-                        icon: Icons.school,
-                        label: 'School',
-                      ),
-                      const SizedBox(height: 14),
-                      _buildBioField(
-                        controller: programmeController,
-                        icon: Icons.menu_book,
-                        label: 'Programme of Study',
-                      ),
-                      const SizedBox(height: 14),
-                      _buildBioField(
-                        controller: yearOfStudyController,
-                        icon: Icons.calendar_today,
-                        label: 'Year of Study',
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: coffeeBrown,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: _saveBioData,
-                          child: const Text('Save'),
-                        ),
-                      ),
-                    ],
-                  ),
+            const SizedBox(height: 18),
+            _buildBioField(
+              controller: nameController,
+              label: 'Name',
+              enabled: _isEditing,
+            ),
+            _buildBioField(
+              controller: genderController,
+              label: 'Gender',
+              enabled: _isEditing,
+            ),
+            _buildBioField(
+              controller: schoolController,
+              label: 'School',
+              enabled: _isEditing,
+            ),
+            _buildBioField(
+              controller: programmeController,
+              label: 'Programme',
+              enabled: _isEditing,
+            ),
+            _buildBioField(
+              controller: yearOfStudyController,
+              label: 'Year of Study',
+              enabled: _isEditing,
+            ),
+            if (_isEditing) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _saveBioData,
+                  child: const Text('Save Changes'),
                 ),
               ),
-            ),
-            const SizedBox(height: 32),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBioField({required TextEditingController controller, required IconData icon, required String label}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F5F2),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextField(
+  Widget _buildBioField({
+    required TextEditingController controller,
+    required String label,
+    bool enabled = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
         controller: controller,
+        enabled: enabled,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: coffeeBrown),
-          border: InputBorder.none,
-          hintText: label,
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentHistoryCard extends StatelessWidget {
+  final String userId;
+  const _PaymentHistoryCard({required this.userId});
+
+  Future<List<Map<String, dynamic>>> _fetchPayments() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('payments')
+        .orderBy('date', descending: true)
+        .get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Payment History',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 18),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchPayments(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No payment history.'));
+                }
+                final payments = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: payments.length,
+                  itemBuilder: (context, index) {
+                    final p = payments[index];
+                    final date = (p['date'] as Timestamp).toDate();
+                    final status = p['status'] ?? 'N/A';
+                    return ListTile(
+                      leading: Icon(
+                        status == 'Success'
+                            ? Icons.check_circle
+                            : Icons.hourglass_top,
+                        color: status == 'Success'
+                            ? Colors.green
+                            : Colors.orange,
+                      ),
+                      title: Text(
+                        'UGX ${NumberFormat('#,###').format(p['amount'] ?? 0)}',
+                      ),
+                      subtitle: Text(
+                        'Paid on ${DateFormat.yMMMd().format(date)}',
+                      ),
+                      trailing: Text(status),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

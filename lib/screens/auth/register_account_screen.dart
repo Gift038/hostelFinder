@@ -29,6 +29,14 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  void _nextStep() {
+    if (_step == 0) {
+      setState(() => _step = 1);
+    } else if (_formKey.currentState?.validate() ?? false) {
+      // Submit or proceed
+    }
+  }
+
   void _prevStep() {
     if (_step > 0) setState(() => _step--);
   }
@@ -55,7 +63,7 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: coffeeBrown.withAlpha(7),
+                  color: coffeeBrown.withOpacity(0.07),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),

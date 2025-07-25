@@ -29,18 +29,28 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final String roomType = args != null && args['roomType'] != null ? args['roomType'] : 'Unknown';
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    // Use the passed arguments, with fallbacks
+    final String hostelName = args?['hostelName'] ?? 'Unknown Hostel';
+    final String roomType = args?['roomType'] ?? 'Unknown Room';
+    final num roomPrice = args?['roomPrice'] ?? 0;
+    roomRate = roomPrice.toInt(); // Update the state variable
+
     total = (roomRate * months) + serviceFee;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        foregroundColor: coffeeBrown,
-        title: Text('Book this space', style: TextStyle(fontWeight: FontWeight.bold, color: coffeeBrown)),
+        foregroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          'Book $hostelName',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         centerTitle: true,
-        leading: BackButton(color: coffeeBrown),
+        leading: const BackButton(),
       ),
       body: ListView(
         padding: EdgeInsets.zero,
@@ -49,11 +59,16 @@ class _BookingScreenState extends State<BookingScreen> {
           Container(
             height: 160,
             width: double.infinity,
-            color: Colors.grey[300],
-            child: Center(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(24),
+              ),
+            ),
+            child: const Center(
               child: Text(
                 'Image goes here',
-                style: TextStyle(color: Colors.grey[700]),
+                style: TextStyle(color: Colors.grey),
               ),
             ),
           ),
@@ -62,84 +77,126 @@ class _BookingScreenState extends State<BookingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Room Type
-                Text('Room Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: coffeeBrown)),
+                Text(
+                  'Room Type',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: lightCoffeeBrown, width: 1.2),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
                   ),
-                  child: Text(roomType, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: coffeeBrown)),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.secondary,
+                      width: 1.2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: Text(
+                    roomType,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ),
                 const SizedBox(height: 28),
-                // Move-in Date
-                Text('Move-in Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: coffeeBrown)),
+                Text(
+                  'Move-in Date',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 10),
                 _CalendarPicker(
                   selectedDate: moveInDate!,
                   onDateSelected: (date) {
                     setState(() {
                       moveInDate = date;
-                      moveOutDate = DateTime(moveInDate!.year, moveInDate!.month + months, moveInDate!.day);
+                      moveOutDate = DateTime(
+                        moveInDate!.year,
+                        moveInDate!.month + months,
+                        moveInDate!.day,
+                      );
                     });
                   },
-                  color: lightCoffeeBrown,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
                 const SizedBox(height: 28),
-                // Move-out Date
-                Text('Move-out Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: coffeeBrown)),
+                Text(
+                  'Move-out Date',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 10),
                 _CalendarPicker(
                   selectedDate: moveOutDate!,
                   onDateSelected: (date) {
                     setState(() {
                       moveOutDate = date;
-                      months = (date.year - moveInDate!.year) * 12 + (date.month - moveInDate!.month);
+                      months =
+                          (date.year - moveInDate!.year) * 12 +
+                          (date.month - moveInDate!.month);
                       if (months < 1) months = 1;
                     });
                   },
-                  color: lightCoffeeBrown,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
                 const SizedBox(height: 28),
-                // Summary of Charges
-                Text('Summary of Charges', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: coffeeBrown)),
+                Text(
+                  'Summary of Charges',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Duration of Stay', style: TextStyle(fontSize: 16)),
-                    Text('$months month${months > 1 ? 's' : ''}', style: TextStyle(fontSize: 16, color: coffeeBrown)),
+                    const Text('Duration of Stay'),
+                    Text(
+                      '$months month${months > 1 ? 's' : ''}',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Room Rate', style: TextStyle(fontSize: 16)),
-                    Text('UGX $roomRate/month', style: TextStyle(fontSize: 16, color: coffeeBrown)),
+                    const Text('Room Rate'),
+                    Text(
+                      'UGX $roomRate/month',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Service Fee', style: TextStyle(fontSize: 16)),
-                    Text('UGX $serviceFee', style: TextStyle(fontSize: 16, color: coffeeBrown)),
+                    const Text('Service Fee'),
+                    Text(
+                      'UGX $serviceFee',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-                    Text('UGX $total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: coffeeBrown)),
+                    const Text(
+                      'Total',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'UGX $total',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 28),
-                _BookNowButton(coffeeBrown: coffeeBrown, lightCoffeeBrown: lightCoffeeBrown, darkBlue: darkBlue),
+                _BookNowButton(
+                  coffeeBrown: Theme.of(context).colorScheme.primary,
+                  lightCoffeeBrown: Theme.of(context).colorScheme.secondary,
+                  darkBlue: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(height: 18),
               ],
             ),
@@ -154,7 +211,11 @@ class _CalendarPicker extends StatelessWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
   final Color color;
-  const _CalendarPicker({required this.selectedDate, required this.onDateSelected, required this.color});
+  const _CalendarPicker({
+    required this.selectedDate,
+    required this.onDateSelected,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +224,9 @@ class _CalendarPicker extends StatelessWidget {
     final lastDay = DateTime(now.year, now.month + 12, 0);
     return Theme(
       data: Theme.of(context).copyWith(
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-          primary: coffeeBrown,
-        ),
+        colorScheme: Theme.of(
+          context,
+        ).colorScheme.copyWith(primary: coffeeBrown),
       ),
       child: CalendarDatePicker(
         initialDate: selectedDate,
@@ -173,7 +234,8 @@ class _CalendarPicker extends StatelessWidget {
         lastDate: lastDay,
         onDateChanged: onDateSelected,
         currentDate: DateTime.now(),
-        selectableDayPredicate: (date) => date.isAfter(now.subtract(const Duration(days: 1))),
+        selectableDayPredicate: (date) =>
+            date.isAfter(now.subtract(const Duration(days: 1))),
       ),
     );
   }
@@ -183,7 +245,11 @@ class _BookNowButton extends StatefulWidget {
   final Color coffeeBrown;
   final Color lightCoffeeBrown;
   final Color darkBlue;
-  const _BookNowButton({required this.coffeeBrown, required this.lightCoffeeBrown, required this.darkBlue});
+  const _BookNowButton({
+    required this.coffeeBrown,
+    required this.lightCoffeeBrown,
+    required this.darkBlue,
+  });
 
   @override
   State<_BookNowButton> createState() => _BookNowButtonState();
