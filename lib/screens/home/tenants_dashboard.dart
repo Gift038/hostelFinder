@@ -5,6 +5,9 @@ import '../tenant_dashboard/profile_screen.dart';
 import 'package:provider/provider.dart';
 import '../../main.dart';
 import '../tenant_dashboard/payment_history.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
 
 class TenantsDashboardScreen extends StatefulWidget {
   const TenantsDashboardScreen({super.key});
@@ -28,6 +31,8 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   bool _isSearching = false;
   String _searchQuery = '';
   String _selectedUniversity = '';
+  bool _loadingSearch = false;
+  List<Map<String, dynamic>> _searchResults = [];
 
   @override
   void initState() {
@@ -126,12 +131,11 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
 
   void _handleSearch() async {
     final query = _searchController.text.trim();
-  void _handleSearch() {
-    final query = _searchController.text.trim();
     if (query.isNotEmpty) {
       setState(() {
         _isSearching = true;
         _searchQuery = query;
+        _loadingSearch = true;
       });
       _searchController.clear();
       final filtered = await _loadHostelsFromFirestore(query);
@@ -146,6 +150,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     setState(() {
       _isSearching = false;
       _searchQuery = '';
+      _searchResults = [];
     });
   }
 
@@ -428,7 +433,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   : _searchResults.isEmpty
                       ? const Center(child: Text('No hostels found.'))
                       : ListView.separated(
-                padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           itemCount: _searchResults.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, i) {
@@ -443,41 +448,10 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                                   : (hostel['imageUrls'] != null && (hostel['imageUrls'] as List).isNotEmpty)
                                       ? hostel['imageUrls'][0]
                                       : '',
-                              hostelId: hostel['id'] ?? hostel['docId'], // Pass the document ID if available
+                              hostelId: hostel['id'] ?? hostel['docId'],
                             );
                           },
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Sample search results - you can replace these with actual results
-                    _buildSearchResultItem(
-                      'The Student Hub',
-                      'Wandegeya, Kampala',
-                      'UGX 500,000/month',
-                      '4.8 ★ (120 reviews)',
-                      'assets/hostel1.jpg',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildSearchResultItem(
-                      'Campus Living',
-                      'Kikoni, Kampala',
-                      'UGX 400,000/month',
-                      '4.6 ★ (95 reviews)',
-                      'assets/hostel2.jpg',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildSearchResultItem(
-                      'University Residence',
-                      'Makerere University',
-                      'UGX 550,000/month',
-                      '4.5 ★ (150 reviews)',
-                      'assets/hostel3.jpg',
-                    ),
-                  ],
-                ),
-              ),
+                        ),
             ),
           ],
         ),
@@ -497,22 +471,22 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         }
       },
       child: Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
               child: imagePath.isNotEmpty
                   ? Image.network(
-              imagePath,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
+                      imagePath,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
                     )
                   : Container(
                       width: 60,
@@ -521,58 +495,53 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                       child: Center(
                         child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
                       ),
-            child: Image.asset(
-              imagePath,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  location,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: TextStyle(
-                        color: coffeeBrown,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
                     ),
-                    const Spacer(),
-                    Text(
-                      rating,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    location,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        price,
+                        style: TextStyle(
+                          color: coffeeBrown,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        rating,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -725,7 +694,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                       ),
                     const SizedBox(width: 8),
                     GestureDetector(
-                      onTap: () => _handleSearch(),
+                      onTap: _handleSearch,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -780,29 +749,29 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                         }
                         final hostels = snapshot.data!.docs;
                         return ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
                           itemCount: hostels.length,
                           itemBuilder: (context, index) {
                             final hostel = hostels[index].data() as Map<String, dynamic>;
                             final images = (hostel['hostelImages'] ?? hostel['imageUrls'] ?? []) as List?;
                             return GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
                                   '/virtual-tours',
                                   arguments: hostels[index].id,
-                            );
-                          },
+                                );
+                              },
                               child: HostelCard(
                                 imagePath: (images != null && images.isNotEmpty) ? images[0] : '',
                                 title: hostel['name'] ?? '',
                                 subtitle: hostel['location'] ?? '',
-                          ),
+                              ),
                             );
                           },
-                            );
-                          },
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -817,7 +786,6 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
           ),
         ],
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.brown[100],
         type: BottomNavigationBarType.fixed,
