@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HostelDetailScreen extends StatelessWidget {
   const HostelDetailScreen({super.key});
@@ -7,33 +8,54 @@ class HostelDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color coffeeBrown = const Color(0xFF4B2E05);
     final Color lightCoffeeBrown = const Color(0xFF9C7A5F);
-    final hostel = ModalRoute.of(context)?.settings.arguments as Map?;
+    final String? hostelId = ModalRoute.of(context)?.settings.arguments as String?;
+    if (hostelId == null) {
+      return const Scaffold(
+        body: Center(child: Text('No hostel selected.')),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFF8F5F2),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF8F5F2),
         foregroundColor: Colors.brown,
         elevation: 0,
-        title: Text(hostel?['name'] ?? 'Hostel'),
+        title: const Text('Hostel'),
         leading: BackButton(color: coffeeBrown),
       ),
-      body: hostel == null
-          ? const Center(child: Text('No hostel data.'))
-          : ListView(
+      body: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance.collection('hostels').doc(hostelId).get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text('Hostel not found.'));
+          }
+          final hostel = snapshot.data!.data() as Map<String, dynamic>;
+          final images = (hostel['hostelImages'] ?? hostel['imageUrls'] ?? []) as List?;
+          return ListView(
               padding: const EdgeInsets.all(24),
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Container(
+                child: images != null && images.isNotEmpty
+                    ? Image.network(
+                        images[0],
                     height: 180,
                     width: double.infinity,
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text(
-                        'Image goes here',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ),
+                    fit: BoxFit.cover,
+                      )
+                    : Container(
+                        height: 180,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: Text(
+                            'Image goes here',
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
+                        ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -47,10 +69,10 @@ class HostelDetailScreen extends StatelessWidget {
                   style: const TextStyle(fontSize: 15, color: Colors.black87),
                 ),
                 const SizedBox(height: 20),
-                if (hostel['rooms'] != null) ...[
-                  const Text('Room Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              if (hostel['rooms'] != null)
+                ...[const Text('Room Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 8),
-                  ...List.generate(hostel['rooms'].length, (i) => Padding(
+                  ...List.generate((hostel['rooms'] as List).length, (i) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Row(
                           children: [
@@ -64,63 +86,9 @@ class HostelDetailScreen extends StatelessWidget {
                       )),
                   const SizedBox(height: 20),
                 ],
-                if (hostel['amenities'] != null) ...[
-                  const Text('Amenities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  ...List.generate(hostel['amenities'].length, (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_box, color: Colors.amber, size: 20),
-                            const SizedBox(width: 8),
-                            Text(hostel['amenities'][i], style: const TextStyle(fontSize: 15)),
-                          ],
-                        ),
-                      )),
-                  const SizedBox(height: 20),
-                ],
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: coffeeBrown,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/matching_hostels');
+            ],
+          );
                     },
-                    child: const Text('Book Now', style: TextStyle(fontSize: 16)),
-                  ),
-                ),
-              ],
-            ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[100],
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: coffeeBrown,
-        unselectedItemColor: lightCoffeeBrown,
-        currentIndex: 0,
-        onTap: (index) {},
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.house_rounded),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.cases_rounded),
-            label: "Documents",
-          ),
-        ],
       ),
     );
   }

@@ -17,7 +17,7 @@ class PaymentScreen extends StatelessWidget {
         backgroundColor: tan,
         elevation: 0,
         foregroundColor: coffeeBrown,
-        title: const Text('Payment', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Payment', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4B2E05))),
         centerTitle: true,
         leading: BackButton(color: coffeeBrown),
       ),
@@ -27,55 +27,39 @@ class PaymentScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Choose payment method',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: coffeeBrown),
             ),
             const SizedBox(height: 24),
             _PaymentMethodCard(
-              icon: Icons.account_balance,
-              title: 'Bank Transfer',
-              subtitle: 'Pay directly from your bank account',
-              onTap: () {},
+              icon: Icons.credit_card,
+              title: 'Bank Card',
+              processingTime: 'Instant - 30 minutes',
+              fee: '0 %',
               coffeeBrown: coffeeBrown,
               lightCoffeeBrown: lightCoffeeBrown,
-              showArrow: false,
+              iconColor: Colors.white,
+              iconBgColor: coffeeBrown,
+              onTap: () {
+                Navigator.pushNamed(context, '/bank_card_payment');
+              },
             ),
             const SizedBox(height: 16),
             _PaymentMethodCard(
               icon: Icons.smartphone,
               title: 'Mobile Money',
-              subtitle: 'Pay with your mobile money account',
-              onTap: () {},
+              processingTime: 'Instant - 30 minutes',
+              fee: '0 %',
               coffeeBrown: coffeeBrown,
               lightCoffeeBrown: lightCoffeeBrown,
-              showArrow: true,
-            ),
-            const SizedBox(height: 16),
-            _PaymentMethodCard(
-              icon: Icons.credit_card,
-              title: 'Card',
-              subtitle: 'Pay with your credit or debit card',
-              onTap: () {},
-              coffeeBrown: coffeeBrown,
-              lightCoffeeBrown: lightCoffeeBrown,
-              showArrow: true,
+              iconColor: Colors.white,
+              iconBgColor: coffeeBrown,
+              onTap: () {
+                Navigator.pushNamed(context, '/mobile_money_payment');
+              },
             ),
             const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: coffeeBrown,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: () {},
-                child: Text('Pay UGX $total', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -86,19 +70,23 @@ class PaymentScreen extends StatelessWidget {
 class _PaymentMethodCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
-  final VoidCallback onTap;
   final Color coffeeBrown;
   final Color lightCoffeeBrown;
-  final bool showArrow;
+  final String processingTime;
+  final String fee;
+  final VoidCallback? onTap;
+  final Color iconColor;
+  final Color iconBgColor;
   const _PaymentMethodCard({
     required this.icon,
     required this.title,
-    required this.subtitle,
-    required this.onTap,
     required this.coffeeBrown,
     required this.lightCoffeeBrown,
-    this.showArrow = false,
+    required this.processingTime,
+    required this.fee,
+    this.onTap,
+    required this.iconColor,
+    required this.iconBgColor,
   });
 
   @override
@@ -107,41 +95,48 @@ class _PaymentMethodCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: coffeeBrown.withAlpha((255 * 0.04).toInt()),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+        border: Border.all(color: Colors.black12),
         ),
         child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+            width: 48,
+            height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F5F2),
-                borderRadius: BorderRadius.circular(8),
+              color: iconBgColor,
+              shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: coffeeBrown, size: 32),
+            child: Center(
+              child: Icon(icon, color: iconColor, size: 28),
+            ),
             ),
             const SizedBox(width: 18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: coffeeBrown)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: TextStyle(fontSize: 15, color: lightCoffeeBrown)),
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: coffeeBrown)),
+                const SizedBox(height: 8),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: 'Processing time ', style: TextStyle(color: lightCoffeeBrown)),
+                      TextSpan(text: processingTime, style: TextStyle(color: coffeeBrown)),
                 ],
               ),
+                  style: const TextStyle(fontSize: 15),
+                ),
+                const SizedBox(height: 2),
+                Text('Fee $fee', style: TextStyle(color: lightCoffeeBrown, fontSize: 15)),
+              ],
             ),
-            if (showArrow)
-              const Icon(Icons.chevron_right, color: Colors.black38, size: 28),
+          ),
           ],
         ),
       ),

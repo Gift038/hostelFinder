@@ -112,58 +112,14 @@ class _HostelListTileState extends State<HostelListTile> {
                       const SizedBox(height: 2),
                       GestureDetector(
                         onTap: () {
+                          // TODO: Pass hostel ID and fetch rooms/images from Firestore
+                          // on the virtual tours screen.
                           Navigator.pushNamed(
                             context,
                             '/virtual-tours',
                             arguments: {
                               'hostelName': widget.name,
-                              'rooms': [
-                                {
-                                  'type': 'Single Room',
-                                  'price': 250000,
-                                  'desc': 'Ideal for individual students',
-                                  'images': [
-                                    'assets/hostel1.jpg',
-                                    'assets/hostel2.jpg',
-                                    'assets/hostel3.jpg',
-                                    'assets/hostel4.jpeg',
-                                    'assets/hostel5.jpg',
-                                    'assets/hostel1.jpg',
-                                  ],
-                                  'available': 3,
-                                  'total': 5,
-                                },
-                                {
-                                  'type': 'Double Room',
-                                  'price': 400000,
-                                  'desc': 'Suitable for sharing with a roommate',
-                                  'images': [
-                                    'assets/hostel2.jpg',
-                                    'assets/hostel3.jpg',
-                                    'assets/hostel4.jpeg',
-                                    'assets/hostel5.jpg',
-                                    'assets/hostel1.jpg',
-                                    'assets/hostel2.jpg',
-                                  ],
-                                  'available': 0,
-                                  'total': 4,
-                                },
-                                {
-                                  'type': 'Triple Room',
-                                  'price': 550000,
-                                  'desc': 'Spacious for three students',
-                                  'images': [
-                                    'assets/hostel3.jpg',
-                                    'assets/hostel4.jpeg',
-                                    'assets/hostel5.jpg',
-                                    'assets/hostel1.jpg',
-                                    'assets/hostel2.jpg',
-                                    'assets/hostel3.jpg',
-                                  ],
-                                  'available': 2,
-                                  'total': 3,
-                                },
-                              ],
+                              'rooms': [], // Pass empty list to avoid hardcoded data
                             },
                           );
                         },
@@ -184,13 +140,20 @@ class _HostelListTileState extends State<HostelListTile> {
                 // Right: Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Container(
+                  child: widget.imagePath.isNotEmpty
+                      ? Image.network(
+                    widget.imagePath,
                     width: 80,
                     height: 70,
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
-                    ),
+                    fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 80,
+                          height: 70,
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+                          ),
                   ),
                 ),
               ],

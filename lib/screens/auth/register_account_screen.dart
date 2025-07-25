@@ -18,7 +18,8 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
 
   int _step = 0;
   String _role = 'Tenant';
-  String _name = '';
+  String _firstName = '';
+  String _lastName = '';
   String _gender = '';
   String _contact = '';
   String _school = '';
@@ -124,7 +125,7 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
           const SizedBox(height: 24),
           TextFormField(
             decoration: InputDecoration(
-              labelText: 'Full Name',
+              labelText: 'First Name',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               prefixIcon: Icon(Icons.person, color: lightCoffeeBrown),
               focusedBorder: OutlineInputBorder(
@@ -132,8 +133,26 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            validator: (v) => v == null || v.isEmpty ? 'Enter your name' : null,
-            onChanged: (v) => _name = v,
+            validator: (v) => v == null || v.isEmpty ? 'Enter your first name' : null,
+            onChanged: (v) => _firstName = v,
+            keyboardType: TextInputType.name,
+            textCapitalization: TextCapitalization.words,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: 'Last Name',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              prefixIcon: Icon(Icons.person_outline, color: lightCoffeeBrown),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: coffeeBrown, width: 2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty ? 'Enter your last name' : null,
+            onChanged: (v) => _lastName = v,
+            keyboardType: TextInputType.name,
+            textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
@@ -169,6 +188,7 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
             ),
             validator: (v) => v == null || v.isEmpty ? 'Enter contact info' : null,
             onChanged: (v) => _contact = v,
+            keyboardType: TextInputType.emailAddress,
           ),
           if (_role == 'Tenant') ...[
             const SizedBox(height: 16),
@@ -184,6 +204,8 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
               ),
               validator: (v) => v == null || v.isEmpty ? 'Enter your school' : null,
               onChanged: (v) => _school = v,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -198,6 +220,8 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
               ),
               validator: (v) => v == null || v.isEmpty ? 'Enter your programme' : null,
               onChanged: (v) => _programme = v,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -210,8 +234,14 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Enter your year of study' : null,
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Enter your year of study';
+                final n = int.tryParse(v);
+                if (n == null || n < 1 || n > 10) return 'Enter a valid year (1-10)';
+                return null;
+              },
               onChanged: (v) => _yearOfStudy = v,
+              keyboardType: TextInputType.number,
             ),
           ],
           if (_role == 'Hostel Manager') ...[
@@ -228,6 +258,8 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
               ),
               validator: (v) => v == null || v.isEmpty ? 'Enter name of hostel managed' : null,
               onChanged: (v) => _hostelManaged = v,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
             ),
           ],
           const SizedBox(height: 24),
@@ -249,7 +281,7 @@ class _RegisterAccountScreenState extends State<RegisterAccountScreen> {
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
                     Provider.of<UserProvider>(context, listen: false).setUser(
-                      name: _name,
+                      name: _firstName + ' ' + _lastName,
                       contact: _contact,
                       gender: _gender,
                       email: _contact, // or use a separate email field if available

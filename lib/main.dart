@@ -19,6 +19,10 @@ import 'screens/manager_dashboard/maintenance_repair.dart';
 import 'screens/tenant_dashboard/tenant_document_screen.dart';
 import 'screens/manager_dashboard/manager_profile_screen.dart';
 import 'screens/home/welcome_screen.dart';
+import 'screens/tenant_dashboard/bank_card_payment_screen.dart';
+import 'screens/tenant_dashboard/mobile_money_payment_screen.dart';
+import 'screens/tenant_dashboard/mobile_money_ussd_screen.dart';
+import 'screens/tenant_dashboard/bank_card_confirm_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -127,6 +131,11 @@ class HostelHuntApp extends StatelessWidget {
         '/room_management': (context) => const RoomManagementScreen(),
         '/tenant_documents': (context) => const TenantDocumentScreen(),
         '/managerProfile': (context) => ManagerProfileScreen(),
+        '/bank_card_payment': (context) => const BankCardPaymentScreen(),
+        '/bank_card_confirm': (context) => const BankCardConfirmScreen(),
+        '/mobile_money_payment': (context) => const MobileMoneyPaymentScreen(),
+        '/mobile_money_ussd': (context) => const MobileMoneyUSSDInstructionScreen(),
+        '/payment': (context) => const PaymentScreen(),
       },
     );
   }

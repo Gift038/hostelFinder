@@ -125,8 +125,19 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     return jsonList.cast<Map<String, dynamic>>();
   }
 
+  Future<List<Map<String, dynamic>>> _loadHostelsFromFirestore(String query) async {
+    final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
+    final hostels = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    final lowerQuery = query.toLowerCase();
+    return hostels.where((hostel) {
+      final name = (hostel['name'] ?? '').toString().toLowerCase();
+      final location = (hostel['location'] ?? '').toString().toLowerCase();
+      return name.contains(lowerQuery) || location.contains(lowerQuery);
+    }).toList();
+  }
+
   void _handleSearch() async {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text.trim();
     if (query.isNotEmpty) {
       setState(() {
         _isSearching = true;
@@ -134,12 +145,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         _loadingSearch = true;
       });
       _searchController.clear();
-      final hostels = await _loadHostels();
-      final filtered = hostels.where((hostel) {
-        final name = (hostel['name'] ?? '').toString().toLowerCase();
-        final location = (hostel['location'] ?? '').toString().toLowerCase();
-        return name.contains(query) || location.contains(query);
-      }).toList();
+      final filtered = await _loadHostelsFromFirestore(query);
       setState(() {
         _searchResults = filtered;
         _loadingSearch = false;
@@ -342,7 +348,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   : _searchResults.isEmpty
                       ? const Center(child: Text('No hostels found.'))
                       : ListView.separated(
-                          padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                           itemCount: _searchResults.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, i) {
@@ -350,14 +356,17 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                             return _buildSearchResultItem(
                               hostel['name'] ?? '',
                               hostel['location'] ?? '',
-                              'UGX ${hostel['min_price'] ?? ''}/month',
+                              'UGX ${hostel['min_price'] ?? hostel['price'] ?? ''}/month',
                               hostel['rating'] != null ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)' : '',
                               (hostel['hostelImages'] != null && (hostel['hostelImages'] as List).isNotEmpty)
                                   ? hostel['hostelImages'][0]
-                                  : '',
+                                  : (hostel['imageUrls'] != null && (hostel['imageUrls'] as List).isNotEmpty)
+                                      ? hostel['imageUrls'][0]
+                                      : '',
+                              hostelId: hostel['id'] ?? hostel['docId'], // Pass the document ID if available
                             );
                           },
-                        ),
+              ),
             ),
           ],
         ),
@@ -365,8 +374,18 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     );
   }
 
-  Widget _buildSearchResultItem(String name, String location, String price, String rating, String imagePath) {
-    return Container(
+  Widget _buildSearchResultItem(String name, String location, String price, String rating, String imagePath, {String? hostelId}) {
+    return GestureDetector(
+      onTap: () {
+        if (hostelId != null) {
+          Navigator.pushNamed(
+            context,
+            '/virtual-tours',
+            arguments: hostelId,
+          );
+        }
+      },
+      child: Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[50],
@@ -377,13 +396,20 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Container(
+              child: imagePath.isNotEmpty
+                  ? Image.network(
+              imagePath,
               width: 60,
               height: 60,
-              color: Colors.grey[300],
-              child: Center(
-                child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
-              ),
+              fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+                      ),
             ),
           ),
           const SizedBox(width: 12),
@@ -431,6 +457,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -626,95 +653,40 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               : SliverToBoxAdapter(
                   child: SizedBox(
                     height: 150,
-                    child: ListView(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance.collection('hostels').limit(10).snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(child: Text('Error loading hostels.'));
+                        }
+                        final hostels = snapshot.data!.docs;
+                        return ListView.builder(
                       controller: _scrollController,
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        GestureDetector(
+                          itemCount: hostels.length,
+                          itemBuilder: (context, index) {
+                            final hostel = hostels[index].data() as Map<String, dynamic>;
+                            final images = (hostel['hostelImages'] ?? hostel['imageUrls'] ?? []) as List?;
+                            return GestureDetector(
                           onTap: () {
                             Navigator.pushNamed(
                               context,
-                              '/search_filter',
-                              arguments: {'university': 'Makerere University'},
+                                  '/virtual-tours',
+                                  arguments: hostels[index].id,
                             );
                           },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel1.jpg',
-                            title: 'Makerere University Hostels',
-                            subtitle: 'Find hostels near Makerere University',
+                              child: HostelCard(
+                                imagePath: (images != null && images.isNotEmpty) ? images[0] : '',
+                                title: hostel['name'] ?? '',
+                                subtitle: hostel['location'] ?? '',
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Kyambogo University'},
                             );
                           },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel2.jpg',
-                            title: 'Kyambogo University Hostels',
-                            subtitle: 'Find hostels near Kyambogo University',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Uganda Christian University'},
                             );
                           },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel3.jpg',
-                            title: 'Uganda Christian University Hostels',
-                            subtitle: 'Find hostels near UCU',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Victoria University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel5.jpg',
-                            title: 'Victoria University Hostels',
-                            subtitle: 'Find hostels near Victoria University',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Ndejje University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel6.jpg',
-                            title: 'Ndejje University Hostels',
-                            subtitle: 'Find hostels near Ndejje University',
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/search_filter',
-                              arguments: {'university': 'Busitema University'},
-                            );
-                          },
-                          child: const HostelCard(
-                            imagePath: 'assets/hostel4.jpg',
-                            title: 'Busitema University Hostels',
-                            subtitle: 'Find hostels near Busitema University',
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),

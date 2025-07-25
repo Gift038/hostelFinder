@@ -59,37 +59,6 @@ class TenantDocumentScreen extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[100],
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: coffeeBrown,
-        unselectedItemColor: lightCoffeeBrown,
-        currentIndex: 3,
-        onTap: (index) {
-          if (index == 3) {
-            Navigator.pushReplacementNamed(context, '/tenant_documents');
-          }
-          // Add navigation for other indices as needed
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.house_rounded),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.cases_rounded),
-            label: "Documents",
-          ),
-        ],
-      ),
     );
   }
 } 
