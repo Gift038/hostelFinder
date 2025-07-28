@@ -70,11 +70,18 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
   void _onHostelSelected(String hostelId) {
     setState(() {
       _selectedHostelId = hostelId;
-      _roomsStream = _firestore
-          .collection('hostels')
-          .doc(hostelId)
-          .collection('rooms')
-          .snapshots();
+      try {
+        _roomsStream = _firestore
+            .collection('hostels')
+            .doc(hostelId)
+            .collection('rooms')
+            .snapshots();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load rooms: $e')),
+        );
+        _roomsStream = null;
+      }
       // _selectedRooms.clear(); // Removed because _selectedRooms no longer exists
     });
   }
@@ -446,7 +453,7 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
-                return Center(child: Text('No rooms found'));
+          return Center(child: Text('No rooms found'));
         }
 
         var filtered = docs;
