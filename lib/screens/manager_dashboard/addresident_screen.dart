@@ -18,6 +18,8 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
   String? _selectedRoomId;
   String? _selectedTenantId;
 
+  Map<String, dynamic>? _tenantPaymentStatus;
+
   // Use ValueNotifier to rebuild the button state
   final ValueNotifier<bool> _isFormValid = ValueNotifier(false);
   bool _isLoading = false;
@@ -61,6 +63,7 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
       _selectedHostelId = hostelId;
       _selectedRoomId = null; // Reset room selection
       _selectedTenantId = null; // Also reset tenant
+      _tenantPaymentStatus = null;
       if (hostelId != null) {
         _roomsStream = _firestore
             .collection('hostels')
@@ -73,6 +76,25 @@ class _AddResidentScreenState extends State<AddResidentScreen> {
       }
       _validateForm();
     });
+  }
+
+  Future<void> _fetchTenantPaymentStatus(String tenantId) async {
+    final paymentsSnapshot = await _firestore
+        .collection('payments')
+        .where('tenantId', isEqualTo: tenantId)
+        .orderBy('date', descending: true)
+        .limit(1)
+        .get();
+
+    if (paymentsSnapshot.docs.isNotEmpty) {
+      setState(() {
+        _tenantPaymentStatus = paymentsSnapshot.docs.first.data();
+      });
+    } else {
+      setState(() {
+        _tenantPaymentStatus = null;
+      });
+    }
   }
 
   Future<void> _assignResident() async {

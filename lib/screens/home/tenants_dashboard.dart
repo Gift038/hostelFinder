@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../widgets/hostel_card.dart';
-import '../../widgets/hostel_list_tile.dart';
 import '../tenant_dashboard/profile_screen.dart';
 import 'package:provider/provider.dart';
 import '../../main.dart';
