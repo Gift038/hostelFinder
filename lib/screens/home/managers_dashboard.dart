@@ -126,75 +126,159 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
+
   Future<Map<String, dynamic>> _fetchDashboardData() async {
-    final managerId = FirebaseAuth.instance.currentUser?.uid;
-    if (managerId == null) {
-      return {
-        'occupancyRate': 0.0,
-        'totalRevenue': 0.0,
-        'averageRent': 0.0,
-        'recentActivity': <ActivityItem>[],
-        'paidPercentage': 0.0,
-      };
-    }
+  final managerId = FirebaseAuth.instance.currentUser?.uid;
+  if (managerId == null) {
+    return {
+      'occupancyRate': 0.0,
+      'totalRevenue': 0.0,
+      'averageRent': 0.0,
+      'recentActivity': <ActivityItem>[],
+      'paidPercentage': 0.0,
+    };
+  }
 
-    // 1. Fetch all hostels managed by this manager to calculate room stats
-    final hostelsSnapshot = await FirebaseFirestore.instance
-        .collection('hostels')
-        .where('managerId', isEqualTo: managerId)
-        .get();
-
-    int totalRooms = 0;
-    int occupiedRooms = 0;
-    if (hostelsSnapshot.docs.isNotEmpty) {
-      for (final hostelDoc in hostelsSnapshot.docs) {
-        final data = hostelDoc.data();
-        totalRooms += (data['totalRooms'] as num?)?.toInt() ?? 0;
-        occupiedRooms += (data['occupiedRooms'] as num?)?.toInt() ?? 0;
-      }
-    }
-
-    // 2. Fetch this month's successful payments to calculate revenue
-    double totalRevenue = 0.0;
-    int successfulPayments = 0;
+  try {
+    // Calculate date range for this month
     final now = DateTime.now();
     final startOfMonth = Timestamp.fromDate(DateTime(now.year, now.month, 1));
-    final endOfMonth = Timestamp.fromDate(DateTime(now.year, now.month + 1, 0));
+    final startOfNextMonth = Timestamp.fromDate(DateTime(now.year, now.month + 1, 1));
 
-    final paymentsSnapshot = await FirebaseFirestore.instance
+    // Execute queries in parallel for better performance
+    final futures = await Future.wait([
+      _fetchHostelStats(managerId),
+      _fetchPaymentStats(managerId, startOfMonth, startOfNextMonth),
+      _fetchRecentActivity(managerId),
+    ]);
+
+    final hostelStats = futures[0] as Map<String, dynamic>;
+    final paymentStats = futures[1] as Map<String, dynamic>;
+    final recentActivity = futures[2] as List<ActivityItem>;
+
+    // Calculate derived metrics
+    final totalRooms = hostelStats['totalRooms'] as int;
+    final occupiedRooms = hostelStats['occupiedRooms'] as int;
+    final occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0.0;
+    
+    // For average rent, you might want to fetch actual room rates instead
+    final totalRevenue = paymentStats['totalRevenue'] as double;
+    final averageRent = occupiedRooms > 0 ? totalRevenue / occupiedRooms : 0.0;
+    
+    final paidPercentage = paymentStats['paidPercentage'] as double;
+
+    return {
+      'occupancyRate': occupancyRate,
+      'totalRevenue': totalRevenue,
+      'averageRent': averageRent,
+      'recentActivity': recentActivity,
+      'paidPercentage': paidPercentage,
+    };
+  } catch (e) {
+    print('Error fetching dashboard data: $e');
+    // Return default values on error
+    return {
+      'occupancyRate': 0.0,
+      'totalRevenue': 0.0,
+      'averageRent': 0.0,
+      'recentActivity': <ActivityItem>[],
+      'paidPercentage': 0.0,
+    };
+  }
+}
+
+Future<Map<String, dynamic>> _fetchHostelStats(String managerId) async {
+  final hostelsSnapshot = await FirebaseFirestore.instance
+      .collection('hostels')
+      .where('managerId', isEqualTo: managerId)
+      .get();
+
+  int totalRooms = 0;
+  int occupiedRooms = 0;
+  
+  for (final hostelDoc in hostelsSnapshot.docs) {
+    final data = hostelDoc.data();
+    totalRooms += (data['totalRooms'] as num?)?.toInt() ?? 0;
+    occupiedRooms += (data['occupiedRooms'] as num?)?.toInt() ?? 0;
+  }
+
+  return {
+    'totalRooms': totalRooms,
+    'occupiedRooms': occupiedRooms,
+  };
+}
+
+Future<Map<String, dynamic>> _fetchPaymentStats(
+  String managerId, 
+  Timestamp startOfMonth, 
+  Timestamp startOfNextMonth
+) async {
+  // Fetch successful payments and total payments in parallel
+  final futures = await Future.wait([
+    FirebaseFirestore.instance
+        .collection('payments')
+        .where('managerId', isEqualTo: managerId)
+        .where('status', isEqualTo: 'Success')
+        .where('date', isGreaterThanOrEqualTo: startOfMonth)
+        .where('date', isLessThan: startOfNextMonth)
+        .get(),
+    FirebaseFirestore.instance
         .collection('payments')
         .where('managerId', isEqualTo: managerId)
         .where('date', isGreaterThanOrEqualTo: startOfMonth)
-        .where('date', isLessThanOrEqualTo: endOfMonth)
-        .get();
+        .where('date', isLessThan: startOfNextMonth)
+        .get(),
+  ]);
 
-    for (final paymentDoc in paymentsSnapshot.docs) {
-      final data = paymentDoc.data();
-      if (data['status'] == 'Success') {
-        totalRevenue += (data['amount'] as num?)?.toDouble() ?? 0.0;
-        successfulPayments++;
-      }
-    }
+  final successfulPaymentsSnapshot = futures[0];
+  final totalPaymentsSnapshot = futures[1];
 
-    final totalPayments = paymentsSnapshot.docs.length;
-    final paidPercentage = totalPayments > 0
-        ? (successfulPayments / totalPayments)
-        : 0.0;
+  // Calculate revenue from successful payments
+  double totalRevenue = 0.0;
+  for (final paymentDoc in successfulPaymentsSnapshot.docs) {
+    final data = paymentDoc.data();
+    totalRevenue += (data['amount'] as num?)?.toDouble() ?? 0.0;
+  }
 
-    // 3. Calculate occupancy rate and average rent
-    final occupancyRate = totalRooms > 0
-        ? (occupiedRooms / totalRooms) * 100
-        : 0.0;
-    final averageRent = occupiedRooms > 0 ? totalRevenue / occupiedRooms : 0.0;
+  final successfulPayments = successfulPaymentsSnapshot.docs.length;
+  final totalPayments = totalPaymentsSnapshot.docs.length;
+  final paidPercentage = totalPayments > 0 ? (successfulPayments / totalPayments) : 0.0;
 
-    // 4. Fetch recent activities WITHOUT ordering in query to avoid composite index error
+  return {
+    'totalRevenue': totalRevenue,
+    'paidPercentage': paidPercentage,
+    'successfulPayments': successfulPayments,
+    'totalPayments': totalPayments,
+  };
+}
+
+Future<List<ActivityItem>> _fetchRecentActivity(String managerId) async {
+  try {
     final residentsSnapshot = await FirebaseFirestore.instance
         .collectionGroup('residents')
         .where('managerId', isEqualTo: managerId)
-        .limit(20) // Fetch more and sort locally to get latest 5
+        .orderBy('createdAt', descending: true)
+        .limit(5)
         .get();
 
-    // Sort locally by createdAt descending
+    return residentsSnapshot.docs.map((doc) {
+      final data = doc.data();
+      return ActivityItem(
+        icon: Icons.person_add,
+        title: 'New Resident: ${data['name'] ?? 'N/A'}',
+        subtitle: 'Hostel: ${data['hostelName'] ?? 'N/A'}',
+      );
+    }).toList();
+  } catch (e) {
+    // If ordering fails (no index), fall back to local sorting
+    print('Falling back to local sorting for recent activity: $e');
+    
+    final residentsSnapshot = await FirebaseFirestore.instance
+        .collectionGroup('residents')
+        .where('managerId', isEqualTo: managerId)
+        .limit(10)
+        .get();
+
     final sortedDocs = residentsSnapshot.docs.toList();
     sortedDocs.sort((a, b) {
       final aTimestamp = a.data()['createdAt'] as Timestamp?;
@@ -205,9 +289,7 @@ class _DashboardContentState extends State<DashboardContent> {
       return bTimestamp.compareTo(aTimestamp);
     });
 
-    final recentActivityDocs = sortedDocs.take(5);
-
-    final recentActivity = recentActivityDocs.map((doc) {
+    return sortedDocs.take(5).map((doc) {
       final data = doc.data();
       return ActivityItem(
         icon: Icons.person_add,
@@ -215,16 +297,9 @@ class _DashboardContentState extends State<DashboardContent> {
         subtitle: 'Hostel: ${data['hostelName'] ?? 'N/A'}',
       );
     }).toList();
-
-    return {
-      'occupancyRate': occupancyRate,
-      'totalRevenue': totalRevenue,
-      'averageRent': averageRent,
-      'recentActivity': recentActivity,
-      'paidPercentage': paidPercentage,
-    };
   }
-
+}
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(

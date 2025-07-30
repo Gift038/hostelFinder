@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hostelhunt_app/google_maps.dart';
 import '../../widgets/hostel_card.dart';
 import '../tenant_dashboard/profile_screen.dart';
 import 'package:provider/provider.dart';
@@ -92,9 +93,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ProfileScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
         );
         break;
       case 3:
@@ -106,19 +105,27 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   Future<List<Map<String, dynamic>>> _loadHostels() async {
     try {
       // Try Firestore first
-      final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('hostels')
+          .get();
       if (snapshot.docs.isNotEmpty) {
         return snapshot.docs.map((doc) => doc.data()).toList();
       }
     } catch (_) {}
     // Fallback to JSON
-    final String jsonString = await rootBundle.loadString('assets/hostels_updated.json');
+    final String jsonString = await rootBundle.loadString(
+      'assets/hostels_updated.json',
+    );
     final List<dynamic> jsonList = json.decode(jsonString);
     return jsonList.cast<Map<String, dynamic>>();
   }
 
-  Future<List<Map<String, dynamic>>> _loadHostelsFromFirestore(String query) async {
-    final snapshot = await FirebaseFirestore.instance.collection('hostels').get();
+  Future<List<Map<String, dynamic>>> _loadHostelsFromFirestore(
+    String query,
+  ) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('hostels')
+        .get();
     final hostels = snapshot.docs.map((doc) => doc.data()).toList();
     final lowerQuery = query.toLowerCase();
     return hostels.where((hostel) {
@@ -173,9 +180,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   Widget _buildMapCard() {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 300,
         decoration: BoxDecoration(
@@ -190,8 +195,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   }
 
   Widget _buildDefaultMapContent() {
-    return Container(
-    );
+    return Container(child: GoogleMapsWidget());
   }
 
   Widget _buildUniversityMapContent() {
@@ -255,22 +259,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.location_on, color: coffeeBrown, size: 32),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Map showing $_selectedUniversity',
-                          style: TextStyle(
-                            color: coffeeBrown,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: Center(child: GoogleMapsWidget()),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -286,9 +275,21 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        _buildNearbyHostelItem('Student Hub', '0.5 km away', 'UGX 500,000'),
-                        _buildNearbyHostelItem('Campus Living', '0.8 km away', 'UGX 400,000'),
-                        _buildNearbyHostelItem('University Residence', '1.2 km away', 'UGX 550,000'),
+                        _buildNearbyHostelItem(
+                          'Student Hub',
+                          '0.5 km away',
+                          'UGX 500,000',
+                        ),
+                        _buildNearbyHostelItem(
+                          'Campus Living',
+                          '0.8 km away',
+                          'UGX 400,000',
+                        ),
+                        _buildNearbyHostelItem(
+                          'University Residence',
+                          '1.2 km away',
+                          'UGX 550,000',
+                        ),
                       ],
                     ),
                   ),
@@ -335,10 +336,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                 ),
                 Text(
                   distance,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
@@ -359,9 +357,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   Widget _buildSearchResultsCard() {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 350,
         decoration: BoxDecoration(
@@ -405,27 +401,31 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
               child: _loadingSearch
                   ? const Center(child: CircularProgressIndicator())
                   : _searchResults.isEmpty
-                      ? const Center(child: Text('No hostels found.'))
-                      : ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _searchResults.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, i) {
-                            final hostel = _searchResults[i];
-                            return _buildSearchResultItem(
-                              hostel['name'] ?? '',
-                              hostel['location'] ?? '',
-                              'UGX ${hostel['min_price'] ?? hostel['price'] ?? ''}/month',
-                              hostel['rating'] != null ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)' : '',
-                              (hostel['hostelImages'] != null && (hostel['hostelImages'] as List).isNotEmpty)
-                                  ? hostel['hostelImages'][0]
-                                  : (hostel['imageUrls'] != null && (hostel['imageUrls'] as List).isNotEmpty)
-                                      ? hostel['imageUrls'][0]
-                                      : '',
-                              hostelId: hostel['id'] ?? hostel['docId'],
-                            );
-                          },
-                        ),
+                  ? const Center(child: Text('No hostels found.'))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _searchResults.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) {
+                        final hostel = _searchResults[i];
+                        return _buildSearchResultItem(
+                          hostel['name'] ?? '',
+                          hostel['location'] ?? '',
+                          'UGX ${hostel['min_price'] ?? hostel['price'] ?? ''}/month',
+                          hostel['rating'] != null
+                              ? '${hostel['rating']} ★ (${hostel['reviews'] ?? 0} reviews)'
+                              : '',
+                          (hostel['hostelImages'] != null &&
+                                  (hostel['hostelImages'] as List).isNotEmpty)
+                              ? hostel['hostelImages'][0]
+                              : (hostel['imageUrls'] != null &&
+                                    (hostel['imageUrls'] as List).isNotEmpty)
+                              ? hostel['imageUrls'][0]
+                              : '',
+                          hostelId: hostel['id'] ?? hostel['docId'],
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -433,15 +433,18 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
     );
   }
 
-  Widget _buildSearchResultItem(String name, String location, String price, String rating, String imagePath, {String? hostelId}) {
+  Widget _buildSearchResultItem(
+    String name,
+    String location,
+    String price,
+    String rating,
+    String imagePath, {
+    String? hostelId,
+  }) {
     return GestureDetector(
       onTap: () {
         if (hostelId != null) {
-          Navigator.pushNamed(
-            context,
-            '/virtual-tours',
-            arguments: hostelId,
-          );
+          Navigator.pushNamed(context, '/virtual-tours', arguments: hostelId);
         }
       },
       child: Container(
@@ -467,7 +470,13 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                       height: 60,
                       color: Colors.grey[300],
                       child: Center(
-                        child: Text('Image goes here', style: TextStyle(color: Colors.grey[700], fontSize: 10)),
+                        child: Text(
+                          'Image goes here',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                     ),
             ),
@@ -486,10 +495,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   const SizedBox(height: 4),
                   Text(
                     location,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -505,10 +511,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                       const Spacer(),
                       Text(
                         rating,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],
                   ),
@@ -548,7 +551,10 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(25),
@@ -620,7 +626,10 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(25),
@@ -640,7 +649,9 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                         controller: _searchController,
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          hintText: _isSearching ? 'Search for more hostels...' : 'Search for hostels...',
+                          hintText: _isSearching
+                              ? 'Search for more hostels...'
+                              : 'Search for hostels...',
                           hintStyle: const TextStyle(
                             color: Colors.grey,
                             fontSize: 16,
@@ -713,13 +724,20 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                   child: SizedBox(
                     height: 150,
                     child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance.collection('hostels').limit(10).snapshots(),
+                      stream: FirebaseFirestore.instance
+                          .collection('hostels')
+                          .limit(10)
+                          .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
                         if (snapshot.hasError) {
-                          return const Center(child: Text('Error loading hostels.'));
+                          return const Center(
+                            child: Text('Error loading hostels.'),
+                          );
                         }
                         final hostels = snapshot.data!.docs;
                         return ListView.builder(
@@ -727,8 +745,13 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                           scrollDirection: Axis.horizontal,
                           itemCount: hostels.length,
                           itemBuilder: (context, index) {
-                            final hostel = hostels[index].data() as Map<String, dynamic>;
-                            final images = (hostel['hostelImages'] ?? hostel['imageUrls'] ?? []) as List?;
+                            final hostel =
+                                hostels[index].data() as Map<String, dynamic>;
+                            final images =
+                                (hostel['hostelImages'] ??
+                                        hostel['imageUrls'] ??
+                                        [])
+                                    as List?;
                             return GestureDetector(
                               onTap: () {
                                 Navigator.pushNamed(
@@ -738,7 +761,9 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                                 );
                               },
                               child: HostelCard(
-                                imagePath: (images != null && images.isNotEmpty) ? images[0] : '',
+                                imagePath: (images != null && images.isNotEmpty)
+                                    ? images[0]
+                                    : '',
                                 title: hostel['name'] ?? '',
                                 subtitle: hostel['location'] ?? '',
                               ),
@@ -749,9 +774,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
                     ),
                   ),
                 ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -772,14 +795,8 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
             icon: Icon(Icons.house_rounded),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.payment), label: 'Payments'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           BottomNavigationBarItem(
             icon: Icon(Icons.cases_rounded),
             label: "Documents",

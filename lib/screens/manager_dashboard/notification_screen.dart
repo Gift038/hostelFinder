@@ -27,15 +27,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final batch = _firestore.batch();
+    // Modified: Get all notifications for user first, then filter unread ones
     final notifications = await _firestore
         .collection('notifications')
         .where('managerId', isEqualTo: user.uid)
-        .where('read', isEqualTo: false)
         .get();
 
+    final batch = _firestore.batch();
+    
+    // Filter unread notifications in code rather than query
     for (var doc in notifications.docs) {
-      batch.update(doc.reference, {'read': true});
+      final data = doc.data() as Map<String, dynamic>;
+      final read = data['read'] as bool? ?? false;
+      
+      if (!read) {
+        batch.update(doc.reference, {'read': true});
+      }
     }
 
     await batch.commit();
@@ -86,10 +93,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
+        // Modified: Only filter by managerId, sort in code
         stream: _firestore
             .collection('notifications')
             .where('managerId', isEqualTo: user.uid)
-            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -104,14 +111,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
             return const Center(child: Text('No notifications'));
           }
 
+          // Sort notifications by createdAt in code
+          final docs = snapshot.data!.docs;
+          docs.sort((a, b) {
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+            final aCreatedAt = (aData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+            final bCreatedAt = (bData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+            return bCreatedAt.compareTo(aCreatedAt); // Descending order
+          });
+
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: docs.length,
             itemBuilder: (context, index) {
-              final doc = snapshot.data!.docs[index];
+              final doc = docs[index];
               final data = doc.data() as Map<String, dynamic>;
               final type = data['type'] as String? ?? 'OTHER';
               final read = data['read'] as bool? ?? false;
-              final createdAt = (data['createdAt'] as Timestamp).toDate();
+              final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
               return Dismissible(
                 key: Key(doc.id),

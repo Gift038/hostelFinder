@@ -9,7 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-import 'dart:html' as web;
 
 import '../../l10n/app_localizations.dart';
 
@@ -75,7 +74,6 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
           .doc(hostelId)
           .collection('rooms')
           .snapshots();
-      // _selectedRooms.clear(); // Removed because _selectedRooms no longer exists
     });
   }
 
@@ -87,8 +85,12 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
     final isEdit = roomDoc != null;
     final data = roomDoc?.data() as Map<String, dynamic>? ?? {};
 
-    final numberCtrl = TextEditingController(text: data['roomNumber']?.toString() ?? '');
-    final priceCtrl = TextEditingController(text: data['price']?.toString() ?? '');
+    final numberCtrl = TextEditingController(
+      text: data['roomNumber']?.toString() ?? '',
+    );
+    final priceCtrl = TextEditingController(
+      text: data['price']?.toString() ?? '',
+    );
     final typeCtrl = TextEditingController(text: data['type'] ?? '');
     final tenantCtrl = TextEditingController(text: data['tenant'] ?? '');
     final rawAmenities = data['amenities'];
@@ -107,9 +109,11 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
       builder: (_) => StatefulBuilder(
         builder: (context, setStateDialog) {
           return AlertDialog(
-            title: Text(isEdit
-                ? AppLocalizations.of(context)?.editRoom ?? 'Edit Room'
-                : AppLocalizations.of(context)?.addRoom ?? 'Add Room'),
+            title: Text(
+              isEdit
+                  ? AppLocalizations.of(context)?.editRoom ?? 'Edit Room'
+                  : AppLocalizations.of(context)?.addRoom ?? 'Add Room',
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -117,7 +121,9 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                   TextField(
                     controller: numberCtrl,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.roomNumber ?? 'Room Number',
+                      labelText:
+                          AppLocalizations.of(context)?.roomNumber ??
+                          'Room Number',
                     ),
                   ),
                   TextField(
@@ -130,27 +136,34 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                   TextField(
                     controller: typeCtrl,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.roomType ?? 'Room Type',
+                      labelText:
+                          AppLocalizations.of(context)?.roomType ?? 'Room Type',
                     ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: ['Wi‑Fi', 'A/C', 'Gym', 'Pool', 'Study Room', 'Kitchen']
-                        .map((amenity) => FilterChip(
-                              label: Text(amenity),
-                              selected: amenities.contains(amenity),
-                              onSelected: (sel) => setStateDialog(() {
-                                sel ? amenities.add(amenity) : amenities.remove(amenity);
-                              }),
-                            ))
-                        .toList(),
+                    children:
+                        ['Wi‑Fi', 'A/C', 'Gym', 'Pool', 'Study Room', 'Kitchen']
+                            .map(
+                              (amenity) => FilterChip(
+                                label: Text(amenity),
+                                selected: amenities.contains(amenity),
+                                onSelected: (sel) => setStateDialog(() {
+                                  sel
+                                      ? amenities.add(amenity)
+                                      : amenities.remove(amenity);
+                                }),
+                              ),
+                            )
+                            .toList(),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: tenantCtrl,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.tenant ?? 'Tenant',
+                      labelText:
+                          AppLocalizations.of(context)?.tenant ?? 'Tenant',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -158,8 +171,11 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                     icon: const Icon(Icons.image),
                     label: Text('Select Image'),
                     onPressed: () async {
-                      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-                      if (picked != null) setStateDialog(() => imageFile = picked);
+                      final picked = await ImagePicker().pickImage(
+                        source: ImageSource.gallery,
+                      );
+                      if (picked != null)
+                        setStateDialog(() => imageFile = picked);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -190,11 +206,21 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                       'isOccupied': data['isOccupied'] ?? false,
                     };
 
-                    if (imageFile != null && !kIsWeb) {
-                      final ref = FirebaseStorage.instance
-                          .ref()
-                          .child('room_images/${DateTime.now().millisecondsSinceEpoch}_${imageFile!.name}');
-                      await ref.putFile(File(imageFile!.path));
+                    // Handle image upload for both web and mobile
+                    if (imageFile != null) {
+                      final ref = FirebaseStorage.instance.ref().child(
+                        'room_images/${DateTime.now().millisecondsSinceEpoch}_${imageFile!.name}',
+                      );
+
+                      if (kIsWeb) {
+                        // Web upload
+                        final bytes = await imageFile!.readAsBytes();
+                        await ref.putData(bytes);
+                      } else {
+                        // Mobile upload
+                        await ref.putFile(File(imageFile!.path));
+                      }
+
                       final url = await ref.getDownloadURL();
                       details['imageUrl'] = url;
                     }
@@ -212,7 +238,11 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                     Navigator.pop(context);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${AppLocalizations.of(context)?.error ?? 'Error'}: $e')),
+                      SnackBar(
+                        content: Text(
+                          '${AppLocalizations.of(context)?.error ?? 'Error'}: $e',
+                        ),
+                      ),
                     );
                   }
                 },
@@ -225,32 +255,35 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
     );
   }
 
-  /// Exports the list of rooms as a CSV file. Only supported on Web.
+  /// Shows CSV data in a dialog for copying (works on all platforms)
   void _exportRooms(List<QueryDocumentSnapshot> rooms) {
     final sb = StringBuffer();
     sb.writeln('Room Number,Price,Type,Occupied');
     for (var r in rooms) {
       final data = r.data() as Map<String, dynamic>;
-      sb.writeln('${data['roomNumber']},${data['price']},${data['type']},${data['isOccupied'] == true ? 'Yes' : 'No'}');
+      sb.writeln(
+        '${data['roomNumber']},${data['price']},${data['type']},${data['isOccupied'] == true ? 'Yes' : 'No'}',
+      );
     }
     final csv = sb.toString();
 
-    if (kIsWeb) {
-      final bytes = utf8.encode(csv);
-      final blob = web.Blob([Uint8List.fromList(bytes)]);
-      final url = web.Url.createObjectUrlFromBlob(blob);
-      final anchor = web.AnchorElement(href: url)
-        ..style.display = 'none'
-        ..download = 'rooms.csv';
-      web.document.body!.append(anchor);
-      anchor.click();
-      anchor.remove();
-      web.Url.revokeObjectUrl(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export only supported on Web for now.')),
-      );
-    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Data'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: SingleChildScrollView(child: SelectableText(csv)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -265,11 +298,25 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
         foregroundColor: Colors.black,
         elevation: 1,
         actions: [
-          if (_selectedHostelId != null && ['manager', 'admin'].contains(_userRole))
+          if (_selectedHostelId != null &&
+              ['manager', 'admin'].contains(_userRole))
             IconButton(
               icon: const Icon(Icons.add),
               tooltip: loc?.addRoom ?? 'Add Room',
               onPressed: () => _showAddEditRoomDialog(),
+            ),
+          // Add export button
+          if (_selectedHostelId != null)
+            IconButton(
+              icon: const Icon(Icons.download),
+              tooltip: 'Export Rooms',
+              onPressed: () {
+                if (_roomsStream != null) {
+                  _roomsStream!.first.then((snapshot) {
+                    _exportRooms(snapshot.docs);
+                  });
+                }
+              },
             ),
         ],
       ),
@@ -296,10 +343,12 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                 value: _selectedHostelId,
                 hint: const Text('Select Hostel'),
                 items: docs
-                    .map((h) => DropdownMenuItem(
-                          value: h.id,
-                          child: Text(h['name'] as String? ?? ''),
-                        ))
+                    .map(
+                      (h) => DropdownMenuItem(
+                        value: h.id,
+                        child: Text(h['name'] as String? ?? ''),
+                      ),
+                    )
                     .toList(),
                 onChanged: (val) {
                   if (val != null) _onHostelSelected(val);
@@ -330,10 +379,10 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
               DropdownButton<String>(
                 value: _filterStatus,
                 items: ['All', 'Occupied', 'Available']
-                    .map((status) => DropdownMenuItem(
-                          value: status,
-                          child: Text(status),
-                        ))
+                    .map(
+                      (status) =>
+                          DropdownMenuItem(value: status, child: Text(status)),
+                    )
                     .toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -386,7 +435,10 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -407,10 +459,12 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
                         DropdownButton<String>(
                           value: _filterStatus,
                           items: ['All', 'Occupied', 'Available']
-                              .map((status) => DropdownMenuItem(
-                                    value: status,
-                                    child: Text(status),
-                                  ))
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ),
+                              )
                               .toList(),
                           onChanged: (val) {
                             if (val != null) {
@@ -435,7 +489,11 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
 
   Widget _buildRoomPanel(AppLocalizations? loc) {
     if (_roomsStream == null) {
-      return Center(child: Text(loc?.selectHostelToViewRooms ?? 'Select a hostel to view rooms'));
+      return Center(
+        child: Text(
+          loc?.selectHostelToViewRooms ?? 'Select a hostel to view rooms',
+        ),
+      );
     }
 
     return StreamBuilder<QuerySnapshot>(
@@ -446,7 +504,7 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
-                return Center(child: Text('No rooms found'));
+          return Center(child: Text('No rooms found'));
         }
 
         var filtered = docs;
@@ -454,14 +512,21 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
           final q = _search.toLowerCase();
           filtered = docs.where((r) {
             final data = r.data() as Map<String, dynamic>;
-            return (data['roomNumber']?.toString().toLowerCase().contains(q) ?? false) ||
-                   (data['type']?.toString().toLowerCase().contains(q) ?? false);
+            return (data['roomNumber']?.toString().toLowerCase().contains(q) ??
+                    false) ||
+                (data['type']?.toString().toLowerCase().contains(q) ?? false);
           }).toList();
         }
 
         if (_filterStatus != 'All') {
           final occupied = _filterStatus == 'Occupied';
-          filtered = filtered.where((r) => (r.data() as Map<String, dynamic>)['isOccupied'] == occupied).toList();
+          filtered = filtered
+              .where(
+                (r) =>
+                    (r.data() as Map<String, dynamic>)['isOccupied'] ==
+                    occupied,
+              )
+              .toList();
         }
 
         return ListView.builder(
@@ -471,8 +536,12 @@ class _RoomManagementScreenState extends State<RoomManagementScreen> {
             final data = room.data() as Map<String, dynamic>;
             return ListTile(
               title: Text('Room ${data['roomNumber']}'),
-              subtitle: Text('${loc?.price ?? 'Price'}: ${data['price'] ?? 'N/A'}'),
-              trailing: Icon(data['isOccupied'] == true ? Icons.close : Icons.check),
+              subtitle: Text(
+                '${loc?.price ?? 'Price'}: ${data['price'] ?? 'N/A'}',
+              ),
+              trailing: Icon(
+                data['isOccupied'] == true ? Icons.close : Icons.check,
+              ),
               onTap: () => _showAddEditRoomDialog(roomDoc: room),
             );
           },

@@ -119,15 +119,17 @@ class FilterOptions {
 }
 
 class GoogleMapsWidget extends StatefulWidget {
-  const GoogleMapsWidget({
+  GoogleMapsWidget({
     super.key,
     this.height = 450,
     this.center,
     this.hostels,
+    
   });
   final double height;
   final LatLng? center;
   final List<Hostel>? hostels;
+  
 
   @override
   State<GoogleMapsWidget> createState() => _GoogleMapsWidgetState();
@@ -151,6 +153,7 @@ class _GoogleMapsWidgetState extends State<GoogleMapsWidget> {
   double _userRating = 0.0;
   final TextEditingController _reviewController = TextEditingController();
   bool _submittingReview = false;
+  
 
   BitmapDescriptor? _normalIcon;
   BitmapDescriptor? _favoriteIcon;
@@ -266,6 +269,7 @@ class _GoogleMapsWidgetState extends State<GoogleMapsWidget> {
       }
     ]
   ''';
+  
 
   List<Hostel> get _filteredHostels {
     if (_searchQuery.isEmpty &&
@@ -1941,7 +1945,7 @@ class _GoogleMapsWidgetState extends State<GoogleMapsWidget> {
               child: GoogleMap(
                 onMapCreated: _onMapCreated,
                 initialCameraPosition: _initialCameraPosition,
-                markers: {..._markers, ..._measureMarkers},
+                markers: _markers,
                 polylines: _measureLines,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
