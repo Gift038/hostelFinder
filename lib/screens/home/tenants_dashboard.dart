@@ -190,32 +190,7 @@ class _TenantsDashboardScreenState extends State<TenantsDashboardScreen>
   }
 
   Widget _buildDefaultMapContent() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.map,
-          size: 64,
-          color: coffeeBrown,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Google Maps',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: coffeeBrown,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Interactive map will be displayed here',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
+    return Container(
     );
   }
 
